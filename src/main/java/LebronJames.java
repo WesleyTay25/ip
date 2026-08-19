@@ -21,7 +21,7 @@ public class LebronJames {
         System.out.println(separator);
 
         Scanner scanner = new Scanner(System.in);
-        String[] tasks = new String[100];
+        Task[] tasks = new Task[100];
         int taskCount = 0;
 
         while (scanner.hasNextLine()) {
@@ -35,13 +35,26 @@ public class LebronJames {
             }
 
             if (command.equals("list")) {
+                System.out.println("Here are the tasks in you currently have:");
                 for (int i = 0; i < taskCount; i++) {
-                    System.out.println((i + 1) + ". " + tasks[i] + " 🏀");
+                    System.out.println((i + 1) + "." + tasks[i] + " 🏀");
                 }
+            } else if (command.startsWith("mark ")) {
+                int taskNumber = Integer.parseInt(command.substring(5));
+                Task task = tasks[taskNumber - 1];
+                task.markAsDone();
+                System.out.println("Nice one bro! This task is done:");
+                System.out.println("  " + task + " 🏀");
+            } else if (command.startsWith("unmark ")) {
+                int taskNumber = Integer.parseInt(command.substring(7));
+                Task task = tasks[taskNumber - 1];
+                task.markAsNotDone();
+                System.out.println("Oops this task is not done yet:");
+                System.out.println("  " + task + " 🏀");
             } else {
-                tasks[taskCount] = command;
+                tasks[taskCount] = new Task(command);
                 taskCount++;
-                System.out.println("added: " + command + " 🏀");
+                System.out.println("okay bro! task added: " + command + " 🏀");
             }
             System.out.println(separator);
         }
