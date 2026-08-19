@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -22,8 +23,7 @@ public class LebronJames {
         System.out.println(separator);
 
         Scanner scanner = new Scanner(System.in);
-        Task[] tasks = new Task[100];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
@@ -38,31 +38,35 @@ public class LebronJames {
 
                 if (command.equals("list")) {
                     System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println((i + 1) + "." + tasks[i] + " 🏀");
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println((i + 1) + "." + tasks.get(i) + " 🏀");
                     }
                 } else if (command.equals("mark") || command.startsWith("mark ")) {
-                    int taskIndex = parseTaskIndex(command, "mark", taskCount);
-                    Task task = tasks[taskIndex];
+                    int taskIndex = parseTaskIndex(command, "mark", tasks.size());
+                    Task task = tasks.get(taskIndex);
                     task.markAsDone();
                     System.out.println("Nice one bro! This task is done:");
                     System.out.println("  " + task + " 🏀");
                 } else if (command.equals("unmark") || command.startsWith("unmark ")) {
-                    int taskIndex = parseTaskIndex(command, "unmark", taskCount);
-                    Task task = tasks[taskIndex];
+                    int taskIndex = parseTaskIndex(command, "unmark", tasks.size());
+                    Task task = tasks.get(taskIndex);
                     task.markAsNotDone();
                     System.out.println("Oops this task is not done yet:");
                     System.out.println("  " + task + " 🏀");
+                } else if (command.equals("delete") || command.startsWith("delete ")) {
+                    int taskIndex = parseTaskIndex(command, "delete", tasks.size());
+                    Task removedTask = tasks.remove(taskIndex);
+                    System.out.println("Noted. I've removed this task:");
+                    System.out.println("  " + removedTask + " 🏀");
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                 } else if (command.equals("todo") || command.startsWith("todo ")) {
                     String description = command.length() > 5 ? command.substring(5).trim() : "";
                     if (description.isEmpty()) {
                         throw new LebronJamesException("Oops! A todo needs a description. Try: todo <task>");
                     } else {
-                        ensureTaskListHasSpace(taskCount, tasks.length);
                         Task task = new Todo(description);
-                        tasks[taskCount] = task;
-                        taskCount++;
-                        printTaskAdded(task, taskCount);
+                        tasks.add(task);
+                        printTaskAdded(task, tasks.size());
                     }
                 } else if (command.equals("deadline") || command.startsWith("deadline ")) {
                     int byIndex = command.indexOf(" /by ");
@@ -77,11 +81,9 @@ public class LebronJames {
                         } else if (by.isEmpty()) {
                             throw new LebronJamesException("Oops! A deadline needs a date or time after /by.");
                         } else {
-                            ensureTaskListHasSpace(taskCount, tasks.length);
                             Task task = new Deadline(description, by);
-                            tasks[taskCount] = task;
-                            taskCount++;
-                            printTaskAdded(task, taskCount);
+                            tasks.add(task);
+                            printTaskAdded(task, tasks.size());
                         }
                     }
                 } else if (command.equals("event") || command.startsWith("event ")) {
@@ -101,11 +103,9 @@ public class LebronJames {
                         } else if (to.isEmpty()) {
                             throw new LebronJamesException("Oops! An event needs an end date or time after /to.");
                         } else {
-                            ensureTaskListHasSpace(taskCount, tasks.length);
                             Task task = new Event(description, from, to);
-                            tasks[taskCount] = task;
-                            taskCount++;
-                            printTaskAdded(task, taskCount);
+                            tasks.add(task);
+                            printTaskAdded(task, tasks.size());
                         }
                     }
                 } else if (command.isBlank()) {
@@ -157,19 +157,6 @@ public class LebronJames {
         } catch (NumberFormatException exception) {
             throw new LebronJamesException(
                     "Oops! The " + commandName + " command needs a whole-number task number.");
-        }
-    }
-
-    /**
-     * Ensures another task can be stored in the fixed-size task list.
-     *
-     * @param taskCount Number of tasks currently stored.
-     * @param capacity Maximum number of tasks that can be stored.
-     * @throws LebronJamesException If the task list is already full.
-     */
-    private static void ensureTaskListHasSpace(int taskCount, int capacity) throws LebronJamesException {
-        if (taskCount >= capacity) {
-            throw new LebronJamesException("Oops! Your task list is full, so I cannot add another task.");
         }
     }
 

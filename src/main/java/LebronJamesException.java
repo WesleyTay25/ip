@@ -1,4 +1,4 @@
-hi/**
+/**
  * Represents an input error specific to the Lebron James chatbot.
  */
 public class LebronJamesException extends Exception {
