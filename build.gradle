@@ -1,11 +1,24 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    // Builds a "fat" JAR: our classes plus every dependency in one runnable file,
+    // so the chatbot can be handed to someone who only has Java installed.
+    // The plugin moved from com.github.johnrengelman to com.gradleup when the
+    // original was no longer maintained; the old one cannot run on Gradle 8+.
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 repositories {
     mavenCentral()
+}
+
+java {
+    // Compile and run against Java 25 no matter which JDK happens to be first on
+    // the PATH. Gradle downloads a matching JDK if it cannot find one installed,
+    // so the build behaves the same on another machine.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 dependencies {
@@ -28,14 +41,26 @@ test {
 }
 
 application {
-    mainClass.set("seedu.duke.Duke")
+    mainClass = "lebronjames.LebronJames"
 }
 
 shadowJar {
-    archiveBaseName = "duke"
-    archiveClassifier = null
+    archiveBaseName = "lebronjames"
+    // No classifier, so the file is lebronjames-<version>.jar rather than
+    // lebronjames-<version>-all.jar.
+    archiveClassifier = ""
 }
 
-run{
+run {
+    // The chatbot reads commands from the keyboard, so the console has to be
+    // connected to the running program. Without this, "gradlew run" would see
+    // no input at all and exit immediately.
     standardInput = System.in
+}
+
+// The application plugin's plain "jar" task also produces build/libs/ip.jar,
+// which holds only our classes and is not the file we ever want to hand out.
+// Turning it off leaves shadowJar's fat JAR as the single build output.
+tasks.named('jar') {
+    enabled = false
 }

@@ -19,3 +19,20 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ```
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+
+## Building and running with Gradle
+
+The project uses the Gradle wrapper, so Gradle itself does not need to be
+installed: `gradlew` downloads the right version on first use. Run these from
+the project root (use `gradlew.bat` instead of `./gradlew` on Windows).
+
+| Command | What it does |
+| --- | --- |
+| `./gradlew run` | Compiles the chatbot and runs it, with the console connected so you can type commands. |
+| `./gradlew build` | Compiles, runs the tests, and packages the app into `build/libs/lebronjames.jar`. |
+| `./gradlew shadowJar` | Builds just that JAR, without running the tests. |
+| `./gradlew test` | Runs the JUnit tests. |
+| `./gradlew clean` | Deletes everything under `build/`. |
+
+`build/libs/lebronjames.jar` is a "fat" JAR containing the app and its
+dependencies, so it can be run anywhere with `java -jar lebronjames.jar`.
