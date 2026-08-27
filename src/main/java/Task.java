@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Represents a task and whether it has been completed.
  *
@@ -52,6 +54,20 @@ public abstract class Task {
     }
 
     /**
+     * Returns whether this task happens on the given date.
+     *
+     * <p>A plain {@link Todo} has no date at all, so the default answer is no.
+     * {@link Deadline} and {@link Event} override this to compare against the
+     * dates they carry.
+     *
+     * @param date Date the user is asking about.
+     * @return Whether this task falls on that date.
+     */
+    public boolean isOn(LocalDate date) {
+        return false;
+    }
+
+    /**
      * Returns the completion status encoded for the save file.
      *
      * @return {@code 1} if completed, or {@code 0} if incomplete.
@@ -64,7 +80,7 @@ public abstract class Task {
      * Returns this task encoded as a single line of the save file.
      *
      * <p>Fields are separated by {@code " | "}, for example
-     * {@code "D | 0 | return book | June 6th"}.
+     * {@code "D | 0 | return book | 2019-06-06"}.
      *
      * @return Save-file representation of this task.
      */
