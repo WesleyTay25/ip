@@ -1,3 +1,5 @@
+package lebronjames;
+
 /**
  * Says goodbye and ends the program.
  */

@@ -1,3 +1,5 @@
+package lebronjames;
+
 /**
  * Makes sense of the text the user types, turning it into a {@link Command}.
  *
