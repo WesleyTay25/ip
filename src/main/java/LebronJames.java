@@ -1,6 +1,5 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Starts the Lebron James chatbot application.
@@ -22,7 +21,7 @@ public class LebronJames {
         ui.showWelcome();
 
         Storage storage = new Storage(DATA_FOLDER, DATA_FILE);
-        ArrayList<Task> tasks = loadTasks(storage, ui);
+        TaskList tasks = loadTasks(storage, ui);
         ui.showLine();
 
         while (ui.hasNextCommand()) {
@@ -48,22 +47,19 @@ public class LebronJames {
                 boolean hasTaskListChanged = false;
 
                 if (command.equals("list")) {
-                    ui.showTaskList(tasks);
+                    ui.showTaskList(tasks.asList());
                 } else if (command.equals("mark") || command.startsWith("mark ")) {
-                    int taskIndex = parseTaskIndex(command, "mark", tasks.size());
-                    Task task = tasks.get(taskIndex);
+                    Task task = tasks.get(parseTaskNumber(command, "mark"));
                     task.markAsDone();
                     hasTaskListChanged = true;
                     ui.showTaskMarked(task);
                 } else if (command.equals("unmark") || command.startsWith("unmark ")) {
-                    int taskIndex = parseTaskIndex(command, "unmark", tasks.size());
-                    Task task = tasks.get(taskIndex);
+                    Task task = tasks.get(parseTaskNumber(command, "unmark"));
                     task.markAsNotDone();
                     hasTaskListChanged = true;
                     ui.showTaskUnmarked(task);
                 } else if (command.equals("delete") || command.startsWith("delete ")) {
-                    int taskIndex = parseTaskIndex(command, "delete", tasks.size());
-                    Task removedTask = tasks.remove(taskIndex);
+                    Task removedTask = tasks.remove(parseTaskNumber(command, "delete"));
                     hasTaskListChanged = true;
                     ui.showTaskRemoved(removedTask, tasks.size());
                 } else if (command.equals("todo") || command.startsWith("todo ")) {
@@ -125,7 +121,7 @@ public class LebronJames {
                         throw new LebronJamesException("Oops! The on command needs a date. Try: on 2019-12-02");
                     }
                     LocalDate date = TaskDateTime.parse(dateText).getDate();
-                    ui.showTasksOn(findTasksOn(tasks, date), date);
+                    ui.showTasksOn(tasks.findTasksOn(date), date);
                 } else if (command.isBlank()) {
                     throw new LebronJamesException("Oops! Please enter a command.");
                 } else {
@@ -134,7 +130,7 @@ public class LebronJames {
                 }
 
                 if (hasTaskListChanged) {
-                    storage.save(tasks);
+                    storage.save(tasks.asList());
                 }
             } catch (LebronJamesException exception) {
                 ui.showError(exception.getMessage());
@@ -153,59 +149,37 @@ public class LebronJames {
      * @param ui User interface used to report the outcome.
      * @return Tasks restored from disk, or an empty list if none could be read.
      */
-    private static ArrayList<Task> loadTasks(Storage storage, Ui ui) {
+    private static TaskList loadTasks(Storage storage, Ui ui) {
         try {
-            ArrayList<Task> tasks = storage.load();
-            ui.showLoaded(tasks.size());
-            return tasks;
+            ArrayList<Task> savedTasks = storage.load();
+            ui.showLoaded(savedTasks.size());
+            return new TaskList(savedTasks);
         } catch (LebronJamesException exception) {
             ui.showLoadingError(exception.getMessage());
-            return new ArrayList<>();
+            return new TaskList();
         }
     }
 
     /**
-     * Returns the deadlines and events that fall on the given date.
+     * Extracts the one-based task number supplied with a command.
      *
-     * <p>To-dos are never included because they carry no date.
-     *
-     * @param tasks Tasks currently stored.
-     * @param date Date the user asked about.
-     * @return Tasks scheduled on that date, in list order.
-     */
-    private static List<Task> findTasksOn(List<Task> tasks, LocalDate date) {
-        List<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.isOn(date)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
-    }
-
-    /**
-     * Extracts and validates the one-based task number supplied with a command.
+     * <p>Only the text itself is checked here. Whether a task with that number
+     * actually exists is decided by {@link TaskList}, which is the object that
+     * knows how long the list is.
      *
      * @param command Full command entered by the user.
      * @param commandName Command word preceding the task number.
-     * @param taskCount Number of tasks currently stored.
-     * @return Zero-based task index.
-     * @throws LebronJamesException If the task number is missing, non-numeric, or out of range.
+     * @return Task number as typed by the user, counting from one.
+     * @throws LebronJamesException If the task number is missing or not a whole number.
      */
-    private static int parseTaskIndex(String command, String commandName, int taskCount)
-            throws LebronJamesException {
+    private static int parseTaskNumber(String command, String commandName) throws LebronJamesException {
         String numberText = command.substring(commandName.length()).trim();
         if (numberText.isEmpty()) {
             throw new LebronJamesException("Oops! The " + commandName + " command needs a task number.");
         }
 
         try {
-            int taskNumber = Integer.parseInt(numberText);
-            if (taskNumber < 1 || taskNumber > taskCount) {
-                throw new LebronJamesException(
-                        "Oops! Task " + taskNumber + " does not exist. Enter a number shown by list.");
-            }
-            return taskNumber - 1;
+            return Integer.parseInt(numberText);
         } catch (NumberFormatException exception) {
             throw new LebronJamesException(
                     "Oops! The " + commandName + " command needs a whole-number task number.");
