@@ -1,7 +1,11 @@
 /**
  * Represents a task and whether it has been completed.
+ *
+ * <p>This class is abstract because every task on the list is really a
+ * {@link Todo}, {@link Deadline}, or {@link Event}; only those subclasses know
+ * how to render themselves for display and for storage on disk.
  */
-public class Task {
+public abstract class Task {
     private final String description;
     private boolean isDone;
 
@@ -37,6 +41,34 @@ public class Task {
     public String getStatusIcon() {
         return isDone ? "X" : " ";
     }
+
+    /**
+     * Returns the description of this task.
+     *
+     * @return Description supplied when the task was created.
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Returns the completion status encoded for the save file.
+     *
+     * @return {@code 1} if completed, or {@code 0} if incomplete.
+     */
+    protected String getDoneFlag() {
+        return isDone ? "1" : "0";
+    }
+
+    /**
+     * Returns this task encoded as a single line of the save file.
+     *
+     * <p>Fields are separated by {@code " | "}, for example
+     * {@code "D | 0 | return book | June 6th"}.
+     *
+     * @return Save-file representation of this task.
+     */
+    public abstract String toFileFormat();
 
     @Override
     public String toString() {

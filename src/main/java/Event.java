@@ -2,6 +2,9 @@
  * Represents a task that occurs between specified start and end times.
  */
 public class Event extends Task {
+    /** Letter used to identify an event in the save file. */
+    public static final String FILE_TYPE = "E";
+
     private final String from;
     private final String to;
 
@@ -16,6 +19,12 @@ public class Event extends Task {
         super(description);
         this.from = from;
         this.to = to;
+    }
+
+    @Override
+    public String toFileFormat() {
+        return FILE_TYPE + " | " + getDoneFlag() + " | " + getDescription()
+                + " | " + from + " | " + to;
     }
 
     @Override

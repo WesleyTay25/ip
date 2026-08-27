@@ -2,6 +2,9 @@
  * Represents a task that must be completed by a specified date or time.
  */
 public class Deadline extends Task {
+    /** Letter used to identify a deadline in the save file. */
+    public static final String FILE_TYPE = "D";
+
     private final String by;
 
     /**
@@ -13,6 +16,11 @@ public class Deadline extends Task {
     public Deadline(String description, String by) {
         super(description);
         this.by = by;
+    }
+
+    @Override
+    public String toFileFormat() {
+        return FILE_TYPE + " | " + getDoneFlag() + " | " + getDescription() + " | " + by;
     }
 
     @Override

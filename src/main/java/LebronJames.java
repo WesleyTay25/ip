@@ -1,10 +1,22 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
  * Starts the Lebron James chatbot application.
  */
 public class LebronJames {
+    /**
+     * Folder and file name of the save file, relative to the project root.
+     * Kept as separate parts so {@link Storage} can join them with the
+     * separator that suits the current operating system.
+     */
+    private static final String DATA_FOLDER = "data";
+    private static final String DATA_FILE = "lebronjames.txt";
+
+    /** Character reserved as the field separator inside the save file. */
+    private static final String RESERVED_CHARACTER = "|";
+
     public static void main(String[] args) {
         String separator = "_".repeat(60);
         String banner = "       .-\"\"\"-.       \n"
@@ -20,10 +32,12 @@ public class LebronJames {
         System.out.println("Hello! I'm Lebron James.");
         System.out.println("What can I do for you?");
         printTaskInstructions();
+
+        Storage storage = new Storage(DATA_FOLDER, DATA_FILE);
+        ArrayList<Task> tasks = loadTasks(storage);
         System.out.println(separator);
 
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Task> tasks = new ArrayList<>();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
@@ -36,6 +50,17 @@ public class LebronJames {
                     break;
                 }
 
+                // The save file uses '|' to separate fields, so a task containing one
+                // could not be read back correctly. Rejecting it early keeps the file valid.
+                if (command.contains(RESERVED_CHARACTER)) {
+                    throw new LebronJamesException(
+                            "Oops! '|' is reserved for saving tasks, so it cannot be used in a command.");
+                }
+
+                // Set to true by any branch that changes the task list, so the list
+                // is written to disk exactly once per command.
+                boolean hasTaskListChanged = false;
+
                 if (command.equals("list")) {
                     System.out.println("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.size(); i++) {
@@ -45,17 +70,20 @@ public class LebronJames {
                     int taskIndex = parseTaskIndex(command, "mark", tasks.size());
                     Task task = tasks.get(taskIndex);
                     task.markAsDone();
+                    hasTaskListChanged = true;
                     System.out.println("Nice one bro! This task is done:");
                     System.out.println("  " + task + " 🏀");
                 } else if (command.equals("unmark") || command.startsWith("unmark ")) {
                     int taskIndex = parseTaskIndex(command, "unmark", tasks.size());
                     Task task = tasks.get(taskIndex);
                     task.markAsNotDone();
+                    hasTaskListChanged = true;
                     System.out.println("Oops this task is not done yet:");
                     System.out.println("  " + task + " 🏀");
                 } else if (command.equals("delete") || command.startsWith("delete ")) {
                     int taskIndex = parseTaskIndex(command, "delete", tasks.size());
                     Task removedTask = tasks.remove(taskIndex);
+                    hasTaskListChanged = true;
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removedTask + " 🏀");
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
@@ -66,6 +94,7 @@ public class LebronJames {
                     } else {
                         Task task = new Todo(description);
                         tasks.add(task);
+                        hasTaskListChanged = true;
                         printTaskAdded(task, tasks.size());
                     }
                 } else if (command.equals("deadline") || command.startsWith("deadline ")) {
@@ -83,6 +112,7 @@ public class LebronJames {
                         } else {
                             Task task = new Deadline(description, by);
                             tasks.add(task);
+                            hasTaskListChanged = true;
                             printTaskAdded(task, tasks.size());
                         }
                     }
@@ -105,6 +135,7 @@ public class LebronJames {
                         } else {
                             Task task = new Event(description, from, to);
                             tasks.add(task);
+                            hasTaskListChanged = true;
                             printTaskAdded(task, tasks.size());
                         }
                     }
@@ -114,10 +145,48 @@ public class LebronJames {
                     throw new LebronJamesException("Sorry, I don't recognise that command.\n"
                             + "Please categorise tasks as todo, deadline, or event using the formats above.");
                 }
+
+                if (hasTaskListChanged) {
+                    storage.save(tasks);
+                }
             } catch (LebronJamesException exception) {
                 System.out.println(exception.getMessage());
             }
             System.out.println(separator);
+        }
+    }
+
+    /**
+     * Loads the saved tasks and reports anything that went wrong.
+     *
+     * <p>Startup never fails because of the save file: if it cannot be read at
+     * all, the chatbot warns the user and begins with an empty list.
+     *
+     * @param storage Storage to load from.
+     * @return Tasks restored from disk, or an empty list if none could be read.
+     */
+    private static ArrayList<Task> loadTasks(Storage storage) {
+        try {
+            ArrayList<Task> tasks = storage.load();
+            List<String> skippedLines = storage.getSkippedLines();
+
+            if (!skippedLines.isEmpty()) {
+                System.out.println("Heads up: " + skippedLines.size() + " line(s) in "
+                        + storage.getFilePath() + " were not in the expected format and were ignored:");
+                for (String skippedLine : skippedLines) {
+                    System.out.println("  " + skippedLine);
+                }
+                System.out.println("They will be dropped from the file the next time your list changes.");
+            }
+
+            if (!tasks.isEmpty()) {
+                System.out.println("I loaded " + tasks.size() + " saved task(s). Type list to see them.");
+            }
+            return tasks;
+        } catch (LebronJamesException exception) {
+            System.out.println(exception.getMessage());
+            System.out.println("Starting with an empty list. Saving will overwrite that file.");
+            return new ArrayList<>();
         }
     }
 
