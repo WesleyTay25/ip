@@ -22,8 +22,12 @@ java {
 }
 
 dependencies {
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+    // junit-jupiter bundles the api (what tests are written against) and the
+    // engine (what runs them). The platform launcher used to be pulled in
+    // automatically; from Gradle 9 it has to be asked for by name, or the test
+    // task fails with "Failed to load JUnit Platform".
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.14.4'
+    testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
 }
 
 test {

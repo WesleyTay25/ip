@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import lebronjames.LebronJamesException;
 
 /**
@@ -30,13 +31,32 @@ public class TaskDateTime {
      * 24-hour time, for example {@code 2019-12-02} and {@code 2019-12-02 1800}.
      */
     private static final DateTimeFormatter[] DATE_ONLY_FORMATS = {
-        DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-        DateTimeFormatter.ofPattern("d/M/yyyy"),
+        strictFormat("uuuu-MM-dd"),
+        strictFormat("d/M/uuuu"),
     };
     private static final DateTimeFormatter[] DATE_TIME_FORMATS = {
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm"),
-        DateTimeFormatter.ofPattern("d/M/yyyy HHmm"),
+        strictFormat("uuuu-MM-dd HHmm"),
+        strictFormat("d/M/uuuu HHmm"),
     };
+
+    /**
+     * Builds a formatter that rejects dates that do not exist.
+     *
+     * <p>By default a formatter resolves leniently: asked for 30 February it
+     * quietly hands back 28 February, so a mistyped deadline would be stored on
+     * the wrong day without any warning. STRICT makes it refuse instead, and the
+     * chatbot can then tell the user what went wrong.
+     *
+     * <p>STRICT requires the year pattern {@code uuuu} rather than {@code yyyy},
+     * because {@code yyyy} means "year within an era" and would need the era
+     * (AD/BC) to be given as well.
+     *
+     * @param pattern Date pattern to compile.
+     * @return Formatter that accepts only real calendar dates.
+     */
+    private static DateTimeFormatter strictFormat(String pattern) {
+        return DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.STRICT);
+    }
 
     /** Format used when writing to the save file, so saved dates read back exactly. */
     private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
