@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+
 import lebronjames.LebronJamesException;
 
 /**
@@ -24,6 +25,11 @@ import lebronjames.LebronJamesException;
  * That makes the class safe to share and easy to reason about.
  */
 public class TaskDateTime {
+    /** Human-readable list of accepted formats, for use in error messages. */
+    public static final String ACCEPTED_FORMATS =
+            "yyyy-MM-dd or dd/mm/yyyy, optionally followed by a 24-hour time, "
+                    + "for example 2019-12-02, 2/12/2019, or 2/12/2019 1800";
+
     /**
      * Input formats accepted from the user, tried in this order.
      *
@@ -39,25 +45,6 @@ public class TaskDateTime {
         strictFormat("d/M/uuuu HHmm"),
     };
 
-    /**
-     * Builds a formatter that rejects dates that do not exist.
-     *
-     * <p>By default a formatter resolves leniently: asked for 30 February it
-     * quietly hands back 28 February, so a mistyped deadline would be stored on
-     * the wrong day without any warning. STRICT makes it refuse instead, and the
-     * chatbot can then tell the user what went wrong.
-     *
-     * <p>STRICT requires the year pattern {@code uuuu} rather than {@code yyyy},
-     * because {@code yyyy} means "year within an era" and would need the era
-     * (AD/BC) to be given as well.
-     *
-     * @param pattern Date pattern to compile.
-     * @return Formatter that accepts only real calendar dates.
-     */
-    private static DateTimeFormatter strictFormat(String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.STRICT);
-    }
-
     /** Format used when writing to the save file, so saved dates read back exactly. */
     private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter FILE_TIME_FORMAT = DateTimeFormatter.ofPattern("HHmm");
@@ -65,11 +52,6 @@ public class TaskDateTime {
     /** Format used when showing a task to the user, for example {@code Oct 15 2019}. */
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
     private static final DateTimeFormatter DISPLAY_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mma");
-
-    /** Human-readable list of accepted formats, for use in error messages. */
-    public static final String ACCEPTED_FORMATS =
-            "yyyy-MM-dd or dd/mm/yyyy, optionally followed by a 24-hour time, "
-                    + "for example 2019-12-02, 2/12/2019, or 2/12/2019 1800";
 
     private final LocalDate date;
 
@@ -88,6 +70,25 @@ public class TaskDateTime {
     private TaskDateTime(LocalDate date, LocalTime time) {
         this.date = date;
         this.time = time;
+    }
+
+    /**
+     * Builds a formatter that rejects dates that do not exist.
+     *
+     * <p>By default a formatter resolves leniently: asked for 30 February it
+     * quietly hands back 28 February, so a mistyped deadline would be stored on
+     * the wrong day without any warning. STRICT makes it refuse instead, and the
+     * chatbot can then tell the user what went wrong.
+     *
+     * <p>STRICT requires the year pattern {@code uuuu} rather than {@code yyyy},
+     * because {@code yyyy} means "year within an era" and would need the era
+     * (AD/BC) to be given as well.
+     *
+     * @param pattern Date pattern to compile.
+     * @return Formatter that accepts only real calendar dates.
+     */
+    private static DateTimeFormatter strictFormat(String pattern) {
+        return DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.STRICT);
     }
 
     /**

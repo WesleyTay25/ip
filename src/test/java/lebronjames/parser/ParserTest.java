@@ -166,8 +166,8 @@ public class ParserTest {
     @Test
     public void parse_eventWithToBeforeFrom_exceptionThrown() {
         // /to is looked for only after /from, so this order is not a valid event.
-        assertThrows(LebronJamesException.class,
-            () -> Parser.parse("event meeting /to 2019-08-06 /from 2019-08-06"));
+        assertThrows(LebronJamesException.class, () ->
+                Parser.parse("event meeting /to 2019-08-06 /from 2019-08-06"));
     }
 
     @Test
@@ -233,8 +233,8 @@ public class ParserTest {
         // the task list's business, and is reported when the command runs.
         Command command = Parser.parse("delete 99");
 
-        assertThrows(LebronJamesException.class,
-            () -> command.execute(new TaskList(), new Ui(), silentStorage()));
+        assertThrows(LebronJamesException.class, () ->
+                command.execute(new TaskList(), new Ui(), silentStorage()));
     }
 
     @Test

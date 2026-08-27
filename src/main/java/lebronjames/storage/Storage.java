@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
 import lebronjames.LebronJamesException;
 import lebronjames.task.Deadline;
 import lebronjames.task.Event;
@@ -140,23 +141,23 @@ public class Storage {
 
         Task task;
         switch (type) {
-        case Todo.FILE_TYPE:
-            requireFieldCount(fields, 3);
-            task = new Todo(description);
-            break;
-        case Deadline.FILE_TYPE:
-            requireFieldCount(fields, 4);
-            requireNonEmpty(fields[3]);
-            task = new Deadline(description, TaskDateTime.parse(fields[3]));
-            break;
-        case Event.FILE_TYPE:
-            requireFieldCount(fields, 5);
-            requireNonEmpty(fields[3]);
-            requireNonEmpty(fields[4]);
-            task = new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
-            break;
-        default:
-            throw new LebronJamesException("Unknown task type: " + type);
+            case Todo.FILE_TYPE:
+                requireFieldCount(fields, 3);
+                task = new Todo(description);
+                break;
+            case Deadline.FILE_TYPE:
+                requireFieldCount(fields, 4);
+                requireNonEmpty(fields[3]);
+                task = new Deadline(description, TaskDateTime.parse(fields[3]));
+                break;
+            case Event.FILE_TYPE:
+                requireFieldCount(fields, 5);
+                requireNonEmpty(fields[3]);
+                requireNonEmpty(fields[4]);
+                task = new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
+                break;
+            default:
+                throw new LebronJamesException("Unknown task type: " + type);
         }
 
         if (isDone) {
