@@ -1,8 +1,6 @@
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Starts the Lebron James chatbot application.
@@ -16,42 +14,25 @@ public class LebronJames {
     private static final String DATA_FOLDER = "data";
     private static final String DATA_FILE = "lebronjames.txt";
 
-    /** Format used when echoing back the date asked about by the on command. */
-    private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
-
     /** Character reserved as the field separator inside the save file. */
     private static final String RESERVED_CHARACTER = "|";
 
     public static void main(String[] args) {
-        String separator = "_".repeat(60);
-        String banner = "       .-\"\"\"-.       \n"
-                + "     .'  \\ | /  '.     \n"
-                + "    /     \\|/     \\    \n"
-                + "   ;-------+-------;   \n"
-                + "    \\     /|\\     /    \n"
-                + "     '.  / | \\  .'     \n"
-                + "       '-...-'";
-
-        System.out.println(separator);
-        System.out.println(banner);
-        System.out.println("Hello! I'm Lebron James.");
-        System.out.println("What can I do for you?");
-        printTaskInstructions();
+        Ui ui = new Ui();
+        ui.showWelcome();
 
         Storage storage = new Storage(DATA_FOLDER, DATA_FILE);
-        ArrayList<Task> tasks = loadTasks(storage);
-        System.out.println(separator);
+        ArrayList<Task> tasks = loadTasks(storage, ui);
+        ui.showLine();
 
-        Scanner scanner = new Scanner(System.in);
+        while (ui.hasNextCommand()) {
+            String command = ui.readCommand();
 
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine();
-
-            System.out.println(separator);
+            ui.showLine();
             try {
                 if (command.equals("bye")) {
-                    System.out.println("Goodbye, I love basketball btw! 🏀");
-                    System.out.println(separator);
+                    ui.showGoodbye();
+                    ui.showLine();
                     break;
                 }
 
@@ -67,31 +48,24 @@ public class LebronJames {
                 boolean hasTaskListChanged = false;
 
                 if (command.equals("list")) {
-                    System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.println((i + 1) + "." + tasks.get(i) + " 🏀");
-                    }
+                    ui.showTaskList(tasks);
                 } else if (command.equals("mark") || command.startsWith("mark ")) {
                     int taskIndex = parseTaskIndex(command, "mark", tasks.size());
                     Task task = tasks.get(taskIndex);
                     task.markAsDone();
                     hasTaskListChanged = true;
-                    System.out.println("Nice one bro! This task is done:");
-                    System.out.println("  " + task + " 🏀");
+                    ui.showTaskMarked(task);
                 } else if (command.equals("unmark") || command.startsWith("unmark ")) {
                     int taskIndex = parseTaskIndex(command, "unmark", tasks.size());
                     Task task = tasks.get(taskIndex);
                     task.markAsNotDone();
                     hasTaskListChanged = true;
-                    System.out.println("Oops this task is not done yet:");
-                    System.out.println("  " + task + " 🏀");
+                    ui.showTaskUnmarked(task);
                 } else if (command.equals("delete") || command.startsWith("delete ")) {
                     int taskIndex = parseTaskIndex(command, "delete", tasks.size());
                     Task removedTask = tasks.remove(taskIndex);
                     hasTaskListChanged = true;
-                    System.out.println("Noted. I've removed this task:");
-                    System.out.println("  " + removedTask + " 🏀");
-                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+                    ui.showTaskRemoved(removedTask, tasks.size());
                 } else if (command.equals("todo") || command.startsWith("todo ")) {
                     String description = command.length() > 5 ? command.substring(5).trim() : "";
                     if (description.isEmpty()) {
@@ -100,7 +74,7 @@ public class LebronJames {
                         Task task = new Todo(description);
                         tasks.add(task);
                         hasTaskListChanged = true;
-                        printTaskAdded(task, tasks.size());
+                        ui.showTaskAdded(task, tasks.size());
                     }
                 } else if (command.equals("deadline") || command.startsWith("deadline ")) {
                     int byIndex = command.indexOf(" /by ");
@@ -118,7 +92,7 @@ public class LebronJames {
                             Task task = new Deadline(description, TaskDateTime.parse(by));
                             tasks.add(task);
                             hasTaskListChanged = true;
-                            printTaskAdded(task, tasks.size());
+                            ui.showTaskAdded(task, tasks.size());
                         }
                     }
                 } else if (command.equals("event") || command.startsWith("event ")) {
@@ -142,7 +116,7 @@ public class LebronJames {
                                     TaskDateTime.parse(from), TaskDateTime.parse(to));
                             tasks.add(task);
                             hasTaskListChanged = true;
-                            printTaskAdded(task, tasks.size());
+                            ui.showTaskAdded(task, tasks.size());
                         }
                     }
                 } else if (command.equals("on") || command.startsWith("on ")) {
@@ -150,7 +124,8 @@ public class LebronJames {
                     if (dateText.isEmpty()) {
                         throw new LebronJamesException("Oops! The on command needs a date. Try: on 2019-12-02");
                     }
-                    printTasksOn(tasks, TaskDateTime.parse(dateText).getDate());
+                    LocalDate date = TaskDateTime.parse(dateText).getDate();
+                    ui.showTasksOn(findTasksOn(tasks, date), date);
                 } else if (command.isBlank()) {
                     throw new LebronJamesException("Oops! Please enter a command.");
                 } else {
@@ -162,9 +137,9 @@ public class LebronJames {
                     storage.save(tasks);
                 }
             } catch (LebronJamesException exception) {
-                System.out.println(exception.getMessage());
+                ui.showError(exception.getMessage());
             }
-            System.out.println(separator);
+            ui.showLine();
         }
     }
 
@@ -175,59 +150,37 @@ public class LebronJames {
      * all, the chatbot warns the user and begins with an empty list.
      *
      * @param storage Storage to load from.
+     * @param ui User interface used to report the outcome.
      * @return Tasks restored from disk, or an empty list if none could be read.
      */
-    private static ArrayList<Task> loadTasks(Storage storage) {
+    private static ArrayList<Task> loadTasks(Storage storage, Ui ui) {
         try {
             ArrayList<Task> tasks = storage.load();
-            if (!tasks.isEmpty()) {
-                System.out.println("I loaded " + tasks.size() + " saved task(s). Type list to see them.");
-            }
+            ui.showLoaded(tasks.size());
             return tasks;
         } catch (LebronJamesException exception) {
-            System.out.println(exception.getMessage());
-            System.out.println("Starting with an empty list. Saving will overwrite that file.");
+            ui.showLoadingError(exception.getMessage());
             return new ArrayList<>();
         }
     }
 
     /**
-     * Prints the accepted formats for adding each type of task.
-     */
-    private static void printTaskInstructions() {
-        System.out.println("Add tasks using one of these formats:");
-        System.out.println("1. Todo: todo <task>");
-        System.out.println("2. Deadline: deadline <task> /by <date>");
-        System.out.println("3. Event: event <task> /from <date> /to <date>");
-        System.out.println("Dates use " + TaskDateTime.ACCEPTED_FORMATS + ".");
-        System.out.println("See what is scheduled for one day with: on <date>");
-    }
-
-    /**
-     * Prints the deadlines and events that fall on the given date.
+     * Returns the deadlines and events that fall on the given date.
      *
-     * <p>To-dos are never listed because they carry no date.
+     * <p>To-dos are never included because they carry no date.
      *
      * @param tasks Tasks currently stored.
      * @param date Date the user asked about.
+     * @return Tasks scheduled on that date, in list order.
      */
-    private static void printTasksOn(List<Task> tasks, LocalDate date) {
+    private static List<Task> findTasksOn(List<Task> tasks, LocalDate date) {
         List<Task> matchingTasks = new ArrayList<>();
         for (Task task : tasks) {
             if (task.isOn(date)) {
                 matchingTasks.add(task);
             }
         }
-
-        if (matchingTasks.isEmpty()) {
-            System.out.println("Nothing scheduled on " + date.format(DISPLAY_DATE_FORMAT) + ". Enjoy the day off!");
-            return;
-        }
-
-        System.out.println("Here is what you have on " + date.format(DISPLAY_DATE_FORMAT) + ":");
-        for (int i = 0; i < matchingTasks.size(); i++) {
-            System.out.println((i + 1) + "." + matchingTasks.get(i) + " 🏀");
-        }
+        return matchingTasks;
     }
 
     /**
@@ -257,17 +210,5 @@ public class LebronJames {
             throw new LebronJamesException(
                     "Oops! The " + commandName + " command needs a whole-number task number.");
         }
-    }
-
-    /**
-     * Prints confirmation that a task was added and reports the new list size.
-     *
-     * @param task Task that was added.
-     * @param taskCount Number of tasks currently stored.
-     */
-    private static void printTaskAdded(Task task, int taskCount) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task + " 🏀");
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
     }
 }
