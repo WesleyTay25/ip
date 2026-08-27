@@ -1,10 +1,16 @@
-package lebronjames;
+package lebronjames.command;
+
+import lebronjames.LebronJamesException;
+import lebronjames.storage.Storage;
+import lebronjames.task.Task;
+import lebronjames.task.TaskList;
+import lebronjames.ui.Ui;
 
 /**
  * Adds a task to the list.
  *
  * <p>One class covers to-dos, deadlines, and events: by the time the command
- * exists, {@link Parser} has already built the right kind of {@link Task}, and
+ * exists, {@link lebronjames.parser.Parser Parser} has already built the right kind of {@link Task}, and
  * adding it is the same work in all three cases. Splitting this into
  * AddTodoCommand, AddDeadlineCommand, and AddEventCommand would give three
  * classes with identical bodies.

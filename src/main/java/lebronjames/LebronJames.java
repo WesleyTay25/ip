@@ -1,6 +1,12 @@
 package lebronjames;
 
 import java.util.ArrayList;
+import lebronjames.command.Command;
+import lebronjames.parser.Parser;
+import lebronjames.storage.Storage;
+import lebronjames.task.Task;
+import lebronjames.task.TaskList;
+import lebronjames.ui.Ui;
 
 /**
  * Runs the Lebron James chatbot application.

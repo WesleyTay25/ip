@@ -1,4 +1,4 @@
-package lebronjames;
+package lebronjames.task;
 
 /**
  * Represents a task without an associated date or time.

@@ -1,4 +1,17 @@
-package lebronjames;
+package lebronjames.parser;
+
+import lebronjames.LebronJamesException;
+import lebronjames.command.AddCommand;
+import lebronjames.command.Command;
+import lebronjames.command.DeleteCommand;
+import lebronjames.command.ExitCommand;
+import lebronjames.command.ListCommand;
+import lebronjames.command.MarkCommand;
+import lebronjames.command.OnCommand;
+import lebronjames.task.Deadline;
+import lebronjames.task.Event;
+import lebronjames.task.TaskDateTime;
+import lebronjames.task.Todo;
 
 /**
  * Makes sense of the text the user types, turning it into a {@link Command}.
@@ -6,7 +19,7 @@ package lebronjames;
  * <p>All the string handling lives here: finding the command word, splitting a
  * deadline at {@code /by}, checking that a task number is a whole number, and
  * complaining when any of that fails. The command classes therefore receive
- * ready-made values such as a {@link Task} or an {@code int}, and never have to
+ * ready-made values such as a {@link lebronjames.task.Task Task} or an {@code int}, and never have to
  * look at raw input.
  *
  * <p>The methods are static because parsing depends only on its input; a Parser
@@ -168,7 +181,7 @@ public class Parser {
      * Extracts the one-based task number supplied with a command.
      *
      * <p>Only the text itself is checked here. Whether a task with that number
-     * actually exists is decided by {@link TaskList}, which is the object that
+     * actually exists is decided by {@link lebronjames.task.TaskList TaskList}, which is the object that
      * knows how long the list is.
      *
      * @param fullCommand Line typed by the user.

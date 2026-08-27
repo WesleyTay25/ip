@@ -1,4 +1,4 @@
-package lebronjames;
+package lebronjames.task;
 
 import java.time.LocalDate;
 
