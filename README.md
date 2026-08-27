@@ -34,5 +34,43 @@ the project root (use `gradlew.bat` instead of `./gradlew` on Windows).
 | `./gradlew test` | Runs the JUnit tests. |
 | `./gradlew clean` | Deletes everything under `build/`. |
 
-`build/libs/lebronjames.jar` is a "fat" JAR containing the app and its
-dependencies, so it can be run anywhere with `java -jar lebronjames.jar`.
+## Packaging the app as a JAR file
+
+The app ships as a single executable "fat" JAR: it holds the compiled classes
+and every dependency, so it runs on any machine with Java 25 installed and
+nothing else.
+
+**To create it**, run this from the project root:
+
+```
+./gradlew shadowJar
+```
+
+(or `./gradlew build`, which also runs the tests first.)
+
+**To locate it**, look in `build/libs/`:
+
+```
+build/libs/lebronjames.jar
+```
+
+The JAR is not committed to the repository - generated binaries do not belong
+in version control, and `/build/` is listed in `.gitignore`. It is distributed
+through a GitHub release instead.
+
+**To run it**:
+
+1. Copy `lebronjames.jar` into an empty folder.
+2. Open a command window in that folder.
+3. Run:
+
+   ```
+   java -jar "lebronjames.jar"
+   ```
+
+The quotes are not normally needed, but they matter if the folder path contains
+spaces or characters such as `[`.
+
+Your tasks are saved to `data/lebronjames.txt`, created next to the JAR the
+first time you add a task, and reloaded the next time you start the app. To
+start over, delete that file.
