@@ -9,6 +9,9 @@ plugins {
     // Measures how much of the code the tests actually reach, so the coverage
     // target in AGENTS.md is a number we can check rather than a guess.
     id 'jacoco'
+    // Checks the code against the se-education Java coding standard, so
+    // compliance is enforced by the build rather than by remembering to look.
+    id 'checkstyle'
 }
 
 repositories {
@@ -45,6 +48,13 @@ test {
         showStackTraces true
         showStandardStreams = false
     }
+}
+
+checkstyle {
+    toolVersion = '14.0.0'
+    // config/checkstyle/checkstyle.xml is se-education's own configuration for
+    // https://se-education.org/guides/conventions/java/intermediate.html
+    configDirectory = file("$rootDir/config/checkstyle")
 }
 
 jacoco {

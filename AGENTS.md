@@ -34,6 +34,44 @@ Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
 
+## Coding standard
+
+All Java code in this project must follow the se-education Java coding standard
+(intermediate level): <https://se-education.org/guides/conventions/java/intermediate.html>
+
+This is enforced by the build, not by memory. `config/checkstyle/checkstyle.xml`
+is se-education's own Checkstyle configuration for that standard, and
+`./gradlew build` fails if any rule is broken. To check on its own:
+
+```
+./gradlew checkstyleMain checkstyleTest
+```
+
+The rules that come up most often in this codebase:
+
+* 4 spaces for indentation, 8 for a wrapped line. Never tabs.
+* Lines at most 120 characters.
+* Imports in four groups, separated by one blank line and each group sorted:
+  static imports, then `java.*`/`javax.*`, then third-party (`org.*`, `com.*`),
+  then `lebronjames.*`. No wildcard imports.
+* Within a class: public fields, then private fields, then constructors, then
+  methods. A method must not be written between two field declarations.
+* Braces on the same line (K&R), and always present, even for a one-line `if`.
+* Boolean names read as questions: `isDone`, `hasTaskListChanged`.
+* Collections take plural names: `tasks`, not `taskList`.
+* Header comments on every public class and method, except getters, setters,
+  and overriding methods whose parent Javadoc still applies.
+
+## Git commit messages
+
+Follow <https://se-education.org/guides/conventions/git.html>:
+
+* Subject line in the imperative mood ("Add find command", not "Added" or
+  "Adds"), capitalized, no full stop, and kept short.
+* Blank line between the subject and the body.
+* Body wrapped at about 72 characters, explaining *why* the change was made and
+  what problem it solves, not restating the diff.
+
 ## Testing
 
 JUnit 5 tests live in `src/test/java`, mirroring the package of the class under
