@@ -124,6 +124,63 @@ public class TaskListTest {
     }
 
     @Test
+    public void findTasksWithKeyword_keywordInDescription_matchesFound() {
+        TaskList tasks = listOf(0);
+        tasks.add(new Todo("read book"));
+        tasks.add(new Todo("return book"));
+        tasks.add(new Todo("buy milk"));
+
+        List<Task> found = tasks.findTasksWithKeyword("book");
+
+        assertEquals(2, found.size());
+        assertEquals("read book", found.get(0).getDescription());
+        assertEquals("return book", found.get(1).getDescription());
+    }
+
+    @Test
+    public void findTasksWithKeyword_differentCapitalisation_stillMatches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("Read Book"));
+
+        assertEquals(1, tasks.findTasksWithKeyword("book").size());
+        assertEquals(1, tasks.findTasksWithKeyword("BOOK").size());
+    }
+
+    @Test
+    public void findTasksWithKeyword_partOfAWord_matches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("visit the bookshop"));
+
+        // Matching inside a word is the more forgiving behaviour for someone
+        // half-remembering what they typed.
+        assertEquals(1, tasks.findTasksWithKeyword("book").size());
+    }
+
+    @Test
+    public void findTasksWithKeyword_noMatch_emptyListNotNull() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("buy milk"));
+
+        assertTrue(tasks.findTasksWithKeyword("book").isEmpty());
+    }
+
+    @Test
+    public void findTasksWithKeyword_matchesEveryTaskType_allReturned() throws LebronJamesException {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        tasks.add(new Deadline("return book", TaskDateTime.parse("2019-06-06")));
+        tasks.add(new Event("book fair", TaskDateTime.parse("2019-06-06"), TaskDateTime.parse("2019-06-07")));
+
+        // The search looks at descriptions, so the kind of task is irrelevant.
+        assertEquals(3, tasks.findTasksWithKeyword("book").size());
+    }
+
+    @Test
+    public void findTasksWithKeyword_emptyList_noMatches() {
+        assertTrue(new TaskList().findTasksWithKeyword("book").isEmpty());
+    }
+
+    @Test
     public void findTasksOn_deadlineOnThatDate_included() throws LebronJamesException {
         TaskList tasks = new TaskList();
         tasks.add(new Deadline("return book", TaskDateTime.parse("2019-12-02")));

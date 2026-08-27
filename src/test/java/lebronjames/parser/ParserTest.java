@@ -16,6 +16,7 @@ import lebronjames.command.AddCommand;
 import lebronjames.command.Command;
 import lebronjames.command.DeleteCommand;
 import lebronjames.command.ExitCommand;
+import lebronjames.command.FindCommand;
 import lebronjames.command.ListCommand;
 import lebronjames.command.MarkCommand;
 import lebronjames.command.OnCommand;
@@ -247,6 +248,32 @@ public class ParserTest {
         assertThrows(LebronJamesException.class, () -> Parser.parse("on"));
         assertThrows(LebronJamesException.class, () -> Parser.parse("on   "));
         assertThrows(LebronJamesException.class, () -> Parser.parse("on someday"));
+    }
+
+    @Test
+    public void parse_findWithKeyword_findCommand() throws LebronJamesException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find book"));
+    }
+
+    @Test
+    public void parse_findWithMultiWordKeyword_wholePhraseKept() throws LebronJamesException {
+        TaskList tasks = new TaskList();
+        Parser.parse("todo read book").execute(tasks, new Ui(), silentStorage());
+        Parser.parse("todo read newspaper").execute(tasks, new Ui(), silentStorage());
+
+        assertEquals(1, tasks.findTasksWithKeyword("read book").size());
+        assertInstanceOf(FindCommand.class, Parser.parse("find read book"));
+    }
+
+    @Test
+    public void parse_findWithoutKeyword_exceptionThrown() {
+        assertThrows(LebronJamesException.class, () -> Parser.parse("find"));
+        assertThrows(LebronJamesException.class, () -> Parser.parse("find   "));
+    }
+
+    @Test
+    public void parse_findAsPrefixOfAnotherWord_notTreatedAsFind() {
+        assertThrows(LebronJamesException.class, () -> Parser.parse("finder"));
     }
 
     @Test

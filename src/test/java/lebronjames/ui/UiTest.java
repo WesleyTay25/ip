@@ -113,6 +113,27 @@ public class UiTest {
     }
 
     @Test
+    public void showMatchingTasks_noMatches_saysSo() {
+        new Ui().showMatchingTasks(new ArrayList<>());
+
+        assertTrue(printed().contains("No matching tasks"));
+    }
+
+    @Test
+    public void showMatchingTasks_someMatches_listedAndNumberedFromOne() {
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(new Todo("read book"));
+        tasks.add(new Todo("return book"));
+
+        new Ui().showMatchingTasks(tasks);
+
+        String output = printed();
+        assertTrue(output.contains("Here are the matching tasks in your list:"));
+        assertTrue(output.contains("1.[T][ ] read book"));
+        assertTrue(output.contains("2.[T][ ] return book"));
+    }
+
+    @Test
     public void showTaskAdded_reportsTheTaskAndTheNewCount() {
         new Ui().showTaskAdded(new Todo("read book"), 5);
 
