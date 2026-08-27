@@ -104,6 +104,28 @@ public class TaskList {
     }
 
     /**
+     * Returns the tasks whose description contains the given keyword.
+     *
+     * <p>The search ignores capitalisation, so "book" finds "Read Book". It
+     * matches anywhere in the description rather than only whole words, so
+     * "book" also finds "bookshop"; that is the more forgiving behaviour for
+     * someone half-remembering what they typed.
+     *
+     * @param keyword Text to look for.
+     * @return Matching tasks, in list order.
+     */
+    public List<Task> findTasksWithKeyword(String keyword) {
+        String lowerCaseKeyword = keyword.toLowerCase();
+        List<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase().contains(lowerCaseKeyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return matchingTasks;
+    }
+
+    /**
      * Returns all tasks, in list order, for displaying or saving.
      *
      * @return The tasks currently stored.

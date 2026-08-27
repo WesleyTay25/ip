@@ -64,6 +64,7 @@ public class Ui {
         System.out.println("3. Event: event <task> /from <date> /to <date>");
         System.out.println("Dates use " + TaskDateTime.ACCEPTED_FORMATS + ".");
         System.out.println("See what is scheduled for one day with: on <date>");
+        System.out.println("Search your tasks with: find <keyword>");
     }
 
     /**
@@ -189,6 +190,21 @@ public class Ui {
         }
 
         System.out.println("Here is what you have on " + date.format(DISPLAY_DATE_FORMAT) + ":");
+        showNumberedTasks(tasks);
+    }
+
+    /**
+     * Prints the tasks that matched a search, or a note that none did.
+     *
+     * @param tasks Tasks whose descriptions contain the keyword.
+     */
+    public void showMatchingTasks(List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            System.out.println("No matching tasks in your list. Try another keyword!");
+            return;
+        }
+
+        System.out.println("Here are the matching tasks in your list:");
         showNumberedTasks(tasks);
     }
 

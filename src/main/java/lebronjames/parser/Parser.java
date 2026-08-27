@@ -5,6 +5,7 @@ import lebronjames.command.AddCommand;
 import lebronjames.command.Command;
 import lebronjames.command.DeleteCommand;
 import lebronjames.command.ExitCommand;
+import lebronjames.command.FindCommand;
 import lebronjames.command.ListCommand;
 import lebronjames.command.MarkCommand;
 import lebronjames.command.OnCommand;
@@ -72,6 +73,9 @@ public class Parser {
         }
         if (isCommand(fullCommand, "on")) {
             return parseOn(fullCommand);
+        }
+        if (isCommand(fullCommand, "find")) {
+            return parseFind(fullCommand);
         }
         if (fullCommand.isBlank()) {
             throw new LebronJamesException("Oops! Please enter a command.");
@@ -175,6 +179,21 @@ public class Parser {
             throw new LebronJamesException("Oops! The on command needs a date. Try: on 2019-12-02");
         }
         return new OnCommand(TaskDateTime.parse(dateText).getDate());
+    }
+
+    /**
+     * Builds the command described by a {@code find} command.
+     *
+     * @param fullCommand Line typed by the user.
+     * @return Command that shows the tasks matching the keyword.
+     * @throws LebronJamesException If no keyword was given.
+     */
+    private static FindCommand parseFind(String fullCommand) throws LebronJamesException {
+        String keyword = fullCommand.substring(4).trim();
+        if (keyword.isEmpty()) {
+            throw new LebronJamesException("Oops! The find command needs a keyword. Try: find book");
+        }
+        return new FindCommand(keyword);
     }
 
     /**
