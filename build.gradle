@@ -6,6 +6,9 @@ plugins {
     // The plugin moved from com.github.johnrengelman to com.gradleup when the
     // original was no longer maintained; the old one cannot run on Gradle 8+.
     id 'com.gradleup.shadow' version '9.6.1'
+    // Measures how much of the code the tests actually reach, so the coverage
+    // target in AGENTS.md is a number we can check rather than a guess.
+    id 'jacoco'
 }
 
 repositories {
@@ -43,6 +46,24 @@ test {
         showStandardStreams = false
     }
 }
+
+jacoco {
+    // 0.8.15 is the first release that understands Java 25 class files.
+    toolVersion = "0.8.15"
+}
+
+jacocoTestReport {
+    // The report is only meaningful once the tests have run.
+    dependsOn test
+
+    reports {
+        html.required = true
+        xml.required = false
+    }
+}
+
+// Make "gradlew test" produce the coverage report too, so it never goes stale.
+test.finalizedBy jacocoTestReport
 
 application {
     mainClass = "lebronjames.LebronJames"
