@@ -1,3 +1,5 @@
+package lebronjames;
+
 /**
  * Represents an input error specific to the Lebron James chatbot.
  */

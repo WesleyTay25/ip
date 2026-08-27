@@ -1,3 +1,10 @@
+package lebronjames.command;
+
+import lebronjames.LebronJamesException;
+import lebronjames.storage.Storage;
+import lebronjames.task.TaskList;
+import lebronjames.ui.Ui;
+
 /**
  * Represents one instruction the user has given, ready to be carried out.
  *
@@ -5,7 +12,7 @@
  * the run loop no longer needs a long if-else chain asking "which command is
  * this?". It simply calls {@link #execute} and lets the object answer.
  *
- * <p>A command is created by {@link Parser} once the user's input has been
+ * <p>A command is created by {@link lebronjames.parser.Parser Parser} once the user's input has been
  * understood, and is given everything it needs at execution time rather than at
  * construction time. That keeps a command a plain description of an intention:
  * "delete task 3" can be created and inspected without any task list existing.

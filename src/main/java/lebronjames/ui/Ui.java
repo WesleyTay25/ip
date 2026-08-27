@@ -1,7 +1,11 @@
+package lebronjames.ui;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
+import lebronjames.task.Task;
+import lebronjames.task.TaskDateTime;
 
 /**
  * Deals with all interactions with the user: reading commands from the keyboard
@@ -79,7 +83,7 @@ public class Ui {
 
     /**
      * Prints an error message, such as the explanation carried by a
-     * {@link LebronJamesException}.
+     * {@link lebronjames.LebronJamesException LebronJamesException}.
      *
      * @param message Explanation to show the user.
      */

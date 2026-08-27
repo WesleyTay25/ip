@@ -1,4 +1,9 @@
+package lebronjames.command;
+
 import java.time.LocalDate;
+import lebronjames.storage.Storage;
+import lebronjames.task.TaskList;
+import lebronjames.ui.Ui;
 
 /**
  * Shows the tasks scheduled on one particular date.

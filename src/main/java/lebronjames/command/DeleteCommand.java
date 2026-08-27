@@ -1,3 +1,11 @@
+package lebronjames.command;
+
+import lebronjames.LebronJamesException;
+import lebronjames.storage.Storage;
+import lebronjames.task.Task;
+import lebronjames.task.TaskList;
+import lebronjames.ui.Ui;
+
 /**
  * Removes a task from the list.
  */
