@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Represents a task that must be completed by a specified date or time.
  */
@@ -5,22 +7,27 @@ public class Deadline extends Task {
     /** Letter used to identify a deadline in the save file. */
     public static final String FILE_TYPE = "D";
 
-    private final String by;
+    private final TaskDateTime by;
 
     /**
      * Creates an incomplete deadline task.
      *
      * @param description Description of the task.
-     * @param by Date or time by which the task must be completed.
+     * @param by Date, and optionally time, by which the task must be completed.
      */
-    public Deadline(String description, String by) {
+    public Deadline(String description, TaskDateTime by) {
         super(description);
         this.by = by;
     }
 
     @Override
+    public boolean isOn(LocalDate date) {
+        return by.getDate().equals(date);
+    }
+
+    @Override
     public String toFileFormat() {
-        return FILE_TYPE + " | " + getDoneFlag() + " | " + getDescription() + " | " + by;
+        return FILE_TYPE + " | " + getDoneFlag() + " | " + getDescription() + " | " + by.toFileFormat();
     }
 
     @Override

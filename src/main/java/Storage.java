@@ -3,7 +3,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,9 +11,12 @@ import java.util.List;
  * <p>Each task occupies one line, with fields separated by {@code " | "}:
  * <pre>
  * T | 1 | read book
- * D | 0 | return book | June 6th
- * E | 0 | project meeting | Aug 6th | 2-4pm
+ * D | 0 | return book | 2019-06-06
+ * E | 0 | project meeting | 2019-08-06 1400 | 2019-08-06 1600
  * </pre>
+ *
+ * <p>Dates are always written in the canonical form produced by
+ * {@link TaskDateTime#toFileFormat()}, whichever accepted format the user typed.
  *
  * <p>The path is built with {@link Path#of(String, String...)} from separate
  * name components rather than a hard-coded string such as {@code "data/x.txt"},
@@ -24,9 +26,6 @@ import java.util.List;
  */
 public class Storage {
     private final Path filePath;
-
-    /** Lines of the save file that could not be understood during the last load. */
-    private final List<String> skippedLines = new ArrayList<>();
 
     /**
      * Creates storage backed by the given relative path.
@@ -43,14 +42,13 @@ public class Storage {
      *
      * <p>A missing file (or missing folder) is not an error: it simply means
      * nothing has been saved yet, so an empty list is returned. Lines that are
-     * not in the expected format are skipped rather than aborting the load, and
-     * can be inspected afterwards with {@link #getSkippedLines()}.
+     * not in the expected format are dropped rather than aborting the load, and
+     * disappear from the file the next time the list is saved.
      *
      * @return Tasks that were read successfully.
      * @throws LebronJamesException If the file exists but cannot be read.
      */
     public ArrayList<Task> load() throws LebronJamesException {
-        skippedLines.clear();
         ArrayList<Task> tasks = new ArrayList<>();
 
         if (!Files.exists(filePath)) {
@@ -74,7 +72,8 @@ public class Storage {
             try {
                 tasks.add(parseTask(line));
             } catch (LebronJamesException exception) {
-                skippedLines.add(line.strip());
+                // The line is damaged or in an outdated format, so there is no task
+                // to restore from it. Dropping it keeps the rest of the list usable.
             }
         }
         return tasks;
@@ -105,24 +104,6 @@ public class Storage {
             throw new LebronJamesException(
                     "Oops! I could not save your tasks to " + filePath + ": " + exception.getMessage());
         }
-    }
-
-    /**
-     * Returns the corrupted lines skipped by the most recent {@link #load()}.
-     *
-     * @return Unmodifiable view of the skipped lines, empty if the file was intact.
-     */
-    public List<String> getSkippedLines() {
-        return Collections.unmodifiableList(skippedLines);
-    }
-
-    /**
-     * Returns the path of the save file, for use in messages to the user.
-     *
-     * @return Relative path of the save file.
-     */
-    public Path getFilePath() {
-        return filePath;
     }
 
     /**
@@ -158,13 +139,13 @@ public class Storage {
         case Deadline.FILE_TYPE:
             requireFieldCount(fields, 4);
             requireNonEmpty(fields[3]);
-            task = new Deadline(description, fields[3]);
+            task = new Deadline(description, TaskDateTime.parse(fields[3]));
             break;
         case Event.FILE_TYPE:
             requireFieldCount(fields, 5);
             requireNonEmpty(fields[3]);
             requireNonEmpty(fields[4]);
-            task = new Event(description, fields[3], fields[4]);
+            task = new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
             break;
         default:
             throw new LebronJamesException("Unknown task type: " + type);

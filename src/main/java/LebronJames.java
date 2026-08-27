@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,6 +15,9 @@ public class LebronJames {
      */
     private static final String DATA_FOLDER = "data";
     private static final String DATA_FILE = "lebronjames.txt";
+
+    /** Format used when echoing back the date asked about by the on command. */
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
 
     /** Character reserved as the field separator inside the save file. */
     private static final String RESERVED_CHARACTER = "|";
@@ -110,7 +115,7 @@ public class LebronJames {
                         } else if (by.isEmpty()) {
                             throw new LebronJamesException("Oops! A deadline needs a date or time after /by.");
                         } else {
-                            Task task = new Deadline(description, by);
+                            Task task = new Deadline(description, TaskDateTime.parse(by));
                             tasks.add(task);
                             hasTaskListChanged = true;
                             printTaskAdded(task, tasks.size());
@@ -133,12 +138,19 @@ public class LebronJames {
                         } else if (to.isEmpty()) {
                             throw new LebronJamesException("Oops! An event needs an end date or time after /to.");
                         } else {
-                            Task task = new Event(description, from, to);
+                            Task task = new Event(description,
+                                    TaskDateTime.parse(from), TaskDateTime.parse(to));
                             tasks.add(task);
                             hasTaskListChanged = true;
                             printTaskAdded(task, tasks.size());
                         }
                     }
+                } else if (command.equals("on") || command.startsWith("on ")) {
+                    String dateText = command.substring(2).trim();
+                    if (dateText.isEmpty()) {
+                        throw new LebronJamesException("Oops! The on command needs a date. Try: on 2019-12-02");
+                    }
+                    printTasksOn(tasks, TaskDateTime.parse(dateText).getDate());
                 } else if (command.isBlank()) {
                     throw new LebronJamesException("Oops! Please enter a command.");
                 } else {
@@ -168,17 +180,6 @@ public class LebronJames {
     private static ArrayList<Task> loadTasks(Storage storage) {
         try {
             ArrayList<Task> tasks = storage.load();
-            List<String> skippedLines = storage.getSkippedLines();
-
-            if (!skippedLines.isEmpty()) {
-                System.out.println("Heads up: " + skippedLines.size() + " line(s) in "
-                        + storage.getFilePath() + " were not in the expected format and were ignored:");
-                for (String skippedLine : skippedLines) {
-                    System.out.println("  " + skippedLine);
-                }
-                System.out.println("They will be dropped from the file the next time your list changes.");
-            }
-
             if (!tasks.isEmpty()) {
                 System.out.println("I loaded " + tasks.size() + " saved task(s). Type list to see them.");
             }
@@ -196,8 +197,37 @@ public class LebronJames {
     private static void printTaskInstructions() {
         System.out.println("Add tasks using one of these formats:");
         System.out.println("1. Todo: todo <task>");
-        System.out.println("2. Deadline: deadline <task> /by <deadline>");
-        System.out.println("3. Event: event <task> /from <start> /to <end>");
+        System.out.println("2. Deadline: deadline <task> /by <date>");
+        System.out.println("3. Event: event <task> /from <date> /to <date>");
+        System.out.println("Dates use " + TaskDateTime.ACCEPTED_FORMATS + ".");
+        System.out.println("See what is scheduled for one day with: on <date>");
+    }
+
+    /**
+     * Prints the deadlines and events that fall on the given date.
+     *
+     * <p>To-dos are never listed because they carry no date.
+     *
+     * @param tasks Tasks currently stored.
+     * @param date Date the user asked about.
+     */
+    private static void printTasksOn(List<Task> tasks, LocalDate date) {
+        List<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.isOn(date)) {
+                matchingTasks.add(task);
+            }
+        }
+
+        if (matchingTasks.isEmpty()) {
+            System.out.println("Nothing scheduled on " + date.format(DISPLAY_DATE_FORMAT) + ". Enjoy the day off!");
+            return;
+        }
+
+        System.out.println("Here is what you have on " + date.format(DISPLAY_DATE_FORMAT) + ":");
+        for (int i = 0; i < matchingTasks.size(); i++) {
+            System.out.println((i + 1) + "." + matchingTasks.get(i) + " 🏀");
+        }
     }
 
     /**
