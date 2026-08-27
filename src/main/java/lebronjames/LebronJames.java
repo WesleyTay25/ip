@@ -1,5 +1,9 @@
 package lebronjames;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import lebronjames.command.Command;
 import lebronjames.parser.Parser;
@@ -51,7 +55,24 @@ public class LebronJames {
     }
 
     public static void main(String[] args) {
+        useUtf8Output();
         new LebronJames(DATA_FOLDER, DATA_FILE).run();
+    }
+
+    /**
+     * Makes printed output UTF-8 regardless of the machine the app is run on.
+     *
+     * <p>By default System.out encodes using whatever character set the console
+     * reports, so on a console that is not UTF-8 the basketball in every reply
+     * arrives as a question mark. Replacing the stream once, here, keeps every
+     * message readable without {@link lebronjames.ui.Ui} having to know
+     * anything about character sets.
+     *
+     * <p>This is done in main rather than inside Ui so that tests can still
+     * capture output with System.setOut in the ordinary way.
+     */
+    private static void useUtf8Output() {
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
     }
 
     /**

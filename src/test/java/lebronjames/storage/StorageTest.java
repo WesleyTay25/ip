@@ -201,6 +201,19 @@ public class StorageTest {
     }
 
     @Test
+    public void save_nonAsciiDescription_readBackUnchanged() throws Exception {
+        // The save file is always UTF-8, so a description with an accent or an
+        // emoji has to survive the round trip byte for byte.
+        Storage storage = storage();
+        storage.save(List.of(new Todo("café run"), new Todo("shoot hoops 🏀")));
+
+        ArrayList<Task> loaded = storage.load();
+
+        assertEquals("café run", loaded.get(0).getDescription());
+        assertEquals("shoot hoops 🏀", loaded.get(1).getDescription());
+    }
+
+    @Test
     public void save_damagedLines_disappearOnTheNextSave() throws Exception {
         writeSaveFile("T | 0 | keep me", "nonsense");
         Storage storage = storage();

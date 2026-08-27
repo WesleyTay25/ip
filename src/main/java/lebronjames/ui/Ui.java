@@ -1,5 +1,6 @@
 package lebronjames.ui;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -31,7 +32,15 @@ public class Ui {
     /** Format used when echoing back the date asked about by the on command. */
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
 
-    private final Scanner scanner = new Scanner(System.in);
+    /**
+     * Reader for the user's commands.
+     *
+     * <p>The character set is stated explicitly rather than left to the
+     * platform. {@link lebronjames.storage.Storage} always writes the save file
+     * as UTF-8, so reading input as anything else would turn a description such
+     * as "café run" into "cafÃ© run" on its way to disk.
+     */
+    private final Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
     /**
      * Prints the greeting, the basketball banner, and the accepted task formats.
