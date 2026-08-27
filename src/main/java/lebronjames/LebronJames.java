@@ -54,6 +54,11 @@ public class LebronJames {
         ui.showLine();
     }
 
+    /**
+     * Starts the chatbot, saving to and loading from the default data file.
+     *
+     * @param args Command line arguments, which the chatbot does not use.
+     */
     public static void main(String[] args) {
         useUtf8Output();
         new LebronJames(DATA_FOLDER, DATA_FILE).run();
