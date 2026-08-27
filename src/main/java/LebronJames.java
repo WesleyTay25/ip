@@ -2,7 +2,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
- * Starts the Lebron James chatbot application.
+ * Runs the Lebron James chatbot application.
+ *
+ * <p>An instance holds the three collaborators the chatbot needs: a {@link Ui}
+ * to talk to the user, a {@link Storage} to remember tasks between runs, and a
+ * {@link TaskList} holding the tasks themselves. Keeping them as fields instead
+ * of local variables inside {@code main} means the run loop can be split into
+ * methods later without threading all three through every call.
  */
 public class LebronJames {
     /**
@@ -16,14 +22,35 @@ public class LebronJames {
     /** Character reserved as the field separator inside the save file. */
     private static final String RESERVED_CHARACTER = "|";
 
-    public static void main(String[] args) {
-        Ui ui = new Ui();
+    private final Ui ui;
+    private final Storage storage;
+    private final TaskList tasks;
+
+    /**
+     * Creates a chatbot that saves to, and loads from, the given file.
+     *
+     * <p>The greeting is printed before loading so that any problem with the
+     * save file is reported as part of the start-up message.
+     *
+     * @param firstPathPart First name in the path to the save file.
+     * @param remainingPathParts Remaining names in the path to the save file.
+     */
+    public LebronJames(String firstPathPart, String... remainingPathParts) {
+        this.ui = new Ui();
+        this.storage = new Storage(firstPathPart, remainingPathParts);
         ui.showWelcome();
-
-        Storage storage = new Storage(DATA_FOLDER, DATA_FILE);
-        TaskList tasks = loadTasks(storage, ui);
+        this.tasks = loadTasks(storage, ui);
         ui.showLine();
+    }
 
+    public static void main(String[] args) {
+        new LebronJames(DATA_FOLDER, DATA_FILE).run();
+    }
+
+    /**
+     * Reads and carries out commands until the user says bye or the input ends.
+     */
+    public void run() {
         while (ui.hasNextCommand()) {
             String command = ui.readCommand();
 
