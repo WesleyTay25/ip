@@ -12,6 +12,10 @@ plugins {
     // Checks the code against the se-education Java coding standard, so
     // compliance is enforced by the build rather than by remembering to look.
     id 'checkstyle'
+    // Puts JavaFX on the compile and run classpath, and picks the build for the
+    // machine the project is opened on. Declaring it here rather than relying on
+    // a JDK that happens to bundle JavaFX keeps the build working on any JDK 25.
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 repositories {
@@ -25,6 +29,14 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
+}
+
+javafx {
+    // Matches the JDK version used above. Only the two modules the chatbot
+    // actually uses are requested: controls for the buttons and text field,
+    // fxml for loading the layouts in src/main/resources/view.
+    version = '25.0.4'
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
@@ -76,7 +88,10 @@ jacocoTestReport {
 test.finalizedBy jacocoTestReport
 
 application {
-    mainClass = "lebronjames.LebronJames"
+    // The GUI is the way the chatbot is meant to be used, so "gradlew run" and
+    // the packaged JAR both start it. lebronjames.LebronJames still has a main
+    // of its own for driving the chatbot from a terminal.
+    mainClass = "lebronjames.Launcher"
 }
 
 shadowJar {
@@ -87,9 +102,9 @@ shadowJar {
 }
 
 run {
-    // The chatbot reads commands from the keyboard, so the console has to be
-    // connected to the running program. Without this, "gradlew run" would see
-    // no input at all and exit immediately.
+    // Harmless for the GUI, but it means "gradlew run -PmainClass=..." style
+    // console use, and the text interface generally, still receives keystrokes.
+    // Without it a console run would see no input at all and exit immediately.
     standardInput = System.in
 }
 

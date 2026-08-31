@@ -1,0 +1,19 @@
+/*
+ * Minimal styling for the chat window. The chatbot's banner and its numbered
+ * task lists are lined up with spaces, so a monospaced font is not decoration
+ * here: in a proportional font the basketball drawing and the columns of the
+ * list both come out crooked.
+ */
+
+.dialog-label {
+    -fx-font-family: "Menlo", "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-background-color: #e8eaf0;
+    -fx-background-radius: 10px;
+    -fx-padding: 8px;
+}
+
+/* Replies from the chatbot, tinted so the two speakers are easy to tell apart. */
+.reply-label {
+    -fx-background-color: #f4e3c1;
+}

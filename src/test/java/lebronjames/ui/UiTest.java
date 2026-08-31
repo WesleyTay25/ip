@@ -4,14 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,51 +19,45 @@ import lebronjames.task.Todo;
 
 /**
  * Tests the parts of {@link Ui} that make a decision rather than simply
- * printing: whether to mention loaded tasks at all, and whether a day is shown
- * as busy or free.
+ * repeating what they were given: whether to mention loaded tasks at all, and
+ * whether a day is shown as busy or free.
  *
- * <p>Ui writes to {@code System.out}, so each test swaps in a stream it can read
- * back, and puts the real one back afterwards. Numbering is checked too, since
- * the numbers printed by {@code list} are what the user types into
- * {@code mark} and {@code delete}.
+ * <p>Ui now collects its replies instead of printing them, so each test reads
+ * the reply back with {@link Ui#getResponse()} rather than capturing
+ * {@code System.out}. Numbering is checked too, since the numbers shown by
+ * {@code list} are what the user types into {@code mark} and {@code delete}.
  */
 public class UiTest {
-    private final PrintStream realOut = System.out;
-    private ByteArrayOutputStream captured;
+    private Ui ui;
 
     @BeforeEach
-    public void redirectSystemOut() {
-        captured = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(captured, true, StandardCharsets.UTF_8));
+    public void createUi() {
+        ui = new Ui();
     }
 
-    @AfterEach
-    public void restoreSystemOut() {
-        System.setOut(realOut);
-    }
+    @Test
+    public void getResponse_calledTwice_secondReplyIsEmpty() {
+        // Each reply must stand alone, or the GUI would repeat the previous
+        // answer inside the next speech bubble.
+        ui.showError("Something went wrong.");
+        ui.getResponse();
 
-    /**
-     * Returns everything printed since this test started.
-     *
-     * @return Captured output.
-     */
-    private String printed() {
-        return captured.toString(StandardCharsets.UTF_8);
+        assertEquals("", ui.getResponse());
     }
 
     @Test
     public void showLoaded_noTasks_saysNothing() {
         // Nothing was restored, so there is nothing worth telling the user.
-        new Ui().showLoaded(0);
+        ui.showLoaded(0);
 
-        assertEquals("", printed());
+        assertEquals("", ui.getResponse());
     }
 
     @Test
     public void showLoaded_someTasks_reportsHowMany() {
-        new Ui().showLoaded(3);
+        ui.showLoaded(3);
 
-        assertTrue(printed().contains("3"), "should say how many tasks were loaded");
+        assertTrue(ui.getResponse().contains("3"), "should say how many tasks were loaded");
     }
 
     @Test
@@ -76,28 +66,29 @@ public class UiTest {
         tasks.add(new Todo("first"));
         tasks.add(new Todo("second"));
 
-        new Ui().showTaskList(tasks);
+        ui.showTaskList(tasks);
 
         // These numbers are what the user types into mark and delete, so
         // starting at 1 is not cosmetic.
-        assertTrue(printed().contains("1.[T][ ] first"));
-        assertTrue(printed().contains("2.[T][ ] second"));
+        String reply = ui.getResponse();
+        assertTrue(reply.contains("1.[T][ ] first"));
+        assertTrue(reply.contains("2.[T][ ] second"));
     }
 
     @Test
     public void showTaskList_emptyList_headingOnly() {
-        new Ui().showTaskList(new ArrayList<>());
+        ui.showTaskList(new ArrayList<>());
 
-        assertEquals("Here are the tasks in your list:", printed().strip());
+        assertEquals("Here are the tasks in your list:", ui.getResponse());
     }
 
     @Test
     public void showTasksOn_noTasks_saysTheDayIsFree() {
-        new Ui().showTasksOn(new ArrayList<>(), LocalDate.of(2019, 12, 2));
+        ui.showTasksOn(new ArrayList<>(), LocalDate.of(2019, 12, 2));
 
-        String output = printed();
-        assertTrue(output.contains("Nothing scheduled"), "should say the day is free");
-        assertTrue(output.contains("Dec 02 2019"), "should name the date asked about");
+        String reply = ui.getResponse();
+        assertTrue(reply.contains("Nothing scheduled"), "should say the day is free");
+        assertTrue(reply.contains("Dec 02 2019"), "should name the date asked about");
     }
 
     @Test
@@ -105,18 +96,18 @@ public class UiTest {
         List<Task> tasks = new ArrayList<>();
         tasks.add(new Deadline("return book", TaskDateTime.parse("2019-12-02")));
 
-        new Ui().showTasksOn(tasks, LocalDate.of(2019, 12, 2));
+        ui.showTasksOn(tasks, LocalDate.of(2019, 12, 2));
 
-        String output = printed();
-        assertFalse(output.contains("Nothing scheduled"));
-        assertTrue(output.contains("1.[D][ ] return book"));
+        String reply = ui.getResponse();
+        assertFalse(reply.contains("Nothing scheduled"));
+        assertTrue(reply.contains("1.[D][ ] return book"));
     }
 
     @Test
     public void showMatchingTasks_noMatches_saysSo() {
-        new Ui().showMatchingTasks(new ArrayList<>());
+        ui.showMatchingTasks(new ArrayList<>());
 
-        assertTrue(printed().contains("No matching tasks"));
+        assertTrue(ui.getResponse().contains("No matching tasks"));
     }
 
     @Test
@@ -125,52 +116,45 @@ public class UiTest {
         tasks.add(new Todo("read book"));
         tasks.add(new Todo("return book"));
 
-        new Ui().showMatchingTasks(tasks);
+        ui.showMatchingTasks(tasks);
 
-        String output = printed();
-        assertTrue(output.contains("Here are the matching tasks in your list:"));
-        assertTrue(output.contains("1.[T][ ] read book"));
-        assertTrue(output.contains("2.[T][ ] return book"));
+        String reply = ui.getResponse();
+        assertTrue(reply.contains("Here are the matching tasks in your list:"));
+        assertTrue(reply.contains("1.[T][ ] read book"));
+        assertTrue(reply.contains("2.[T][ ] return book"));
     }
 
     @Test
     public void showTaskAdded_reportsTheTaskAndTheNewCount() {
-        new Ui().showTaskAdded(new Todo("read book"), 5);
+        ui.showTaskAdded(new Todo("read book"), 5);
 
-        String output = printed();
-        assertTrue(output.contains("[T][ ] read book"));
-        assertTrue(output.contains("5"), "should report the new list size");
+        String reply = ui.getResponse();
+        assertTrue(reply.contains("[T][ ] read book"));
+        assertTrue(reply.contains("5"), "should report the new list size");
     }
 
     @Test
     public void showTaskRemoved_reportsTheTaskAndTheRemainingCount() {
-        new Ui().showTaskRemoved(new Todo("read book"), 2);
+        ui.showTaskRemoved(new Todo("read book"), 2);
 
-        String output = printed();
-        assertTrue(output.contains("[T][ ] read book"));
-        assertTrue(output.contains("2"));
+        String reply = ui.getResponse();
+        assertTrue(reply.contains("[T][ ] read book"));
+        assertTrue(reply.contains("2"));
     }
 
     @Test
-    public void showError_printsTheMessageUnchanged() {
-        new Ui().showError("Oops! something went wrong.");
+    public void showError_returnsTheMessageUnchanged() {
+        ui.showError("Oops! something went wrong.");
 
-        assertEquals("Oops! something went wrong.", printed().strip());
+        assertEquals("Oops! something went wrong.", ui.getResponse());
     }
 
     @Test
     public void showLoadingError_explainsTheListStartsEmpty() {
-        new Ui().showLoadingError("Oops! I could not read the file.");
+        ui.showLoadingError("Oops! I could not read the file.");
 
-        String output = printed();
-        assertTrue(output.contains("Oops! I could not read the file."));
-        assertTrue(output.contains("empty list"), "should say what happens next");
-    }
-
-    @Test
-    public void showLine_printsADivider() {
-        new Ui().showLine();
-
-        assertEquals("_".repeat(60), printed().strip());
+        String reply = ui.getResponse();
+        assertTrue(reply.contains("Oops! I could not read the file."));
+        assertTrue(reply.contains("empty list"), "should say what happens next");
     }
 }

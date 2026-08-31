@@ -10,16 +10,23 @@ import lebronjames.task.Task;
 import lebronjames.task.TaskDateTime;
 
 /**
- * Deals with all interactions with the user: reading commands from the keyboard
- * and printing messages to the screen.
+ * Deals with all interactions with the user: reading commands and wording the
+ * replies that are shown back.
  *
  * <p>Gathering the input and output here means the rest of the chatbot never
  * calls {@code System.out} directly. Wording and layout can then be changed in
  * one place, and the task-handling classes stay free of display details.
+ *
+ * <p>Replies are collected into a buffer rather than printed straight away.
+ * {@link #getResponse()} hands back everything said since it was last called
+ * and empties the buffer, so the same {@code Ui} serves both front ends: the
+ * text interface prints that string, while the graphical one puts it in a
+ * dialog bubble. Printing directly would have tied every {@code show} method
+ * to the console.
  */
 public class Ui {
-    /** Horizontal rule printed above and below every reply. */
-    private static final String SEPARATOR = "_".repeat(60);
+    /** Horizontal rule the text interface prints above and below every reply. */
+    public static final String SEPARATOR = "_".repeat(60);
 
     /** Basketball drawn at start-up. */
     private static final String BANNER = "       .-\"\"\"-.       \n"
@@ -34,7 +41,7 @@ public class Ui {
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
 
     /**
-     * Reader for the user's commands.
+     * Reader for the user's commands, used by the text interface only.
      *
      * <p>The character set is stated explicitly rather than left to the
      * platform. {@link lebronjames.storage.Storage} always writes the save file
@@ -43,35 +50,42 @@ public class Ui {
      */
     private final Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
+    /** Reply being built up, until {@link #getResponse()} takes it away. */
+    private final StringBuilder response = new StringBuilder();
+
     /**
-     * Prints the greeting, the basketball banner, and the accepted task formats.
+     * Returns everything said since this method was last called, and clears the
+     * buffer so the next reply starts empty.
+     *
+     * @return Reply text, with no leading or trailing blank lines.
+     */
+    public String getResponse() {
+        String reply = response.toString().strip();
+        response.setLength(0);
+        return reply;
+    }
+
+    /**
+     * Adds the greeting, the basketball banner, and the accepted task formats.
      */
     public void showWelcome() {
-        showLine();
-        System.out.println(BANNER);
-        System.out.println("Hello! I'm Lebron James.");
-        System.out.println("What can I do for you?");
+        say(BANNER);
+        say("Hello! I'm Lebron James.");
+        say("What can I do for you?");
         showTaskInstructions();
     }
 
     /**
-     * Prints the accepted formats for adding each type of task.
+     * Adds the accepted formats for adding each type of task.
      */
     public void showTaskInstructions() {
-        System.out.println("Add tasks using one of these formats:");
-        System.out.println("1. Todo: todo <task>");
-        System.out.println("2. Deadline: deadline <task> /by <date>");
-        System.out.println("3. Event: event <task> /from <date> /to <date>");
-        System.out.println("Dates use " + TaskDateTime.ACCEPTED_FORMATS + ".");
-        System.out.println("See what is scheduled for one day with: on <date>");
-        System.out.println("Search your tasks with: find <keyword>");
-    }
-
-    /**
-     * Prints the horizontal rule that separates one reply from the next.
-     */
-    public void showLine() {
-        System.out.println(SEPARATOR);
+        say("Add tasks using one of these formats:");
+        say("1. Todo: todo <task>");
+        say("2. Deadline: deadline <task> /by <date>");
+        say("3. Event: event <task> /from <date> /to <date>");
+        say("Dates use " + TaskDateTime.ACCEPTED_FORMATS + ".");
+        say("See what is scheduled for one day with: on <date>");
+        say("Search your tasks with: find <keyword>");
     }
 
     /**
@@ -93,13 +107,13 @@ public class Ui {
     }
 
     /**
-     * Prints an error message, such as the explanation carried by a
+     * Adds an error message, such as the explanation carried by a
      * {@link lebronjames.LebronJamesException LebronJamesException}.
      *
      * @param message Explanation to show the user.
      */
     public void showError(String message) {
-        System.out.println(message);
+        say(message);
     }
 
     /**
@@ -109,7 +123,7 @@ public class Ui {
      */
     public void showLoaded(int taskCount) {
         if (taskCount > 0) {
-            System.out.println("I loaded " + taskCount + " saved task(s). Type list to see them.");
+            say("I loaded " + taskCount + " saved task(s). Type list to see them.");
         }
     }
 
@@ -119,110 +133,119 @@ public class Ui {
      * @param message Explanation of what went wrong.
      */
     public void showLoadingError(String message) {
-        System.out.println(message);
-        System.out.println("Starting with an empty list. Saving will overwrite that file.");
+        say(message);
+        say("Starting with an empty list. Saving will overwrite that file.");
     }
 
     /**
-     * Prints the whole task list, numbered from one.
+     * Adds the whole task list, numbered from one.
      *
      * @param tasks Tasks currently stored.
      */
     public void showTaskList(List<Task> tasks) {
-        System.out.println("Here are the tasks in your list:");
+        say("Here are the tasks in your list:");
         showNumberedTasks(tasks);
     }
 
     /**
-     * Prints confirmation that a task was added and reports the new list size.
+     * Confirms that a task was added and reports the new list size.
      *
      * @param task Task that was added.
      * @param taskCount Number of tasks currently stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task + " 🏀");
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+        say("Got it. I've added this task:");
+        say("  " + task + " 🏀");
+        say("Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
-     * Prints confirmation that a task was removed and reports the new list size.
+     * Confirms that a task was removed and reports the new list size.
      *
      * @param task Task that was removed.
      * @param taskCount Number of tasks still stored.
      */
     public void showTaskRemoved(Task task, int taskCount) {
-        System.out.println("Noted. I've removed this task:");
-        System.out.println("  " + task + " 🏀");
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+        say("Noted. I've removed this task:");
+        say("  " + task + " 🏀");
+        say("Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
-     * Prints confirmation that a task was marked as done.
+     * Confirms that a task was marked as done.
      *
      * @param task Task that was marked.
      */
     public void showTaskMarked(Task task) {
-        System.out.println("Nice one bro! This task is done:");
-        System.out.println("  " + task + " 🏀");
+        say("Nice one bro! This task is done:");
+        say("  " + task + " 🏀");
     }
 
     /**
-     * Prints confirmation that a task was marked as not done.
+     * Confirms that a task was marked as not done.
      *
      * @param task Task that was unmarked.
      */
     public void showTaskUnmarked(Task task) {
-        System.out.println("Oops this task is not done yet:");
-        System.out.println("  " + task + " 🏀");
+        say("Oops this task is not done yet:");
+        say("  " + task + " 🏀");
     }
 
     /**
-     * Prints the tasks that fall on the given date, or a note that the day is free.
+     * Adds the tasks that fall on the given date, or a note that the day is free.
      *
      * @param tasks Tasks scheduled on that date.
      * @param date Date the user asked about.
      */
     public void showTasksOn(List<Task> tasks, LocalDate date) {
         if (tasks.isEmpty()) {
-            System.out.println("Nothing scheduled on " + date.format(DISPLAY_DATE_FORMAT) + ". Enjoy the day off!");
+            say("Nothing scheduled on " + date.format(DISPLAY_DATE_FORMAT) + ". Enjoy the day off!");
             return;
         }
 
-        System.out.println("Here is what you have on " + date.format(DISPLAY_DATE_FORMAT) + ":");
+        say("Here is what you have on " + date.format(DISPLAY_DATE_FORMAT) + ":");
         showNumberedTasks(tasks);
     }
 
     /**
-     * Prints the tasks that matched a search, or a note that none did.
+     * Adds the tasks that matched a search, or a note that none did.
      *
      * @param tasks Tasks whose descriptions contain the keyword.
      */
     public void showMatchingTasks(List<Task> tasks) {
         if (tasks.isEmpty()) {
-            System.out.println("No matching tasks in your list. Try another keyword!");
+            say("No matching tasks in your list. Try another keyword!");
             return;
         }
 
-        System.out.println("Here are the matching tasks in your list:");
+        say("Here are the matching tasks in your list:");
         showNumberedTasks(tasks);
     }
 
     /**
-     * Prints the farewell message.
+     * Adds the farewell message.
      */
     public void showGoodbye() {
-        System.out.println("Goodbye, I love basketball btw! 🏀");
+        say("Goodbye, I love basketball btw! 🏀");
     }
 
     /**
-     * Prints the given tasks as a numbered list starting at one.
+     * Adds the given tasks as a numbered list starting at one.
      *
-     * @param tasks Tasks to print, in list order.
+     * @param tasks Tasks to add, in list order.
      */
     private void showNumberedTasks(List<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i) + " 🏀");
+            say((i + 1) + "." + tasks.get(i) + " 🏀");
         }
+    }
+
+    /**
+     * Adds one line to the reply being built up.
+     *
+     * @param line Text to add, without a line break of its own.
+     */
+    private void say(String line) {
+        response.append(line).append(System.lineSeparator());
     }
 }
