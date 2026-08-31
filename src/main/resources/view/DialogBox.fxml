@@ -19,7 +19,7 @@
     <children>
         <!-- wrapText keeps a long reply inside the window instead of stretching it. -->
         <Label fx:id="dialog" styleClass="dialog-label" text="Label" wrapText="true" HBox.hgrow="ALWAYS" />
-        <ImageView fx:id="displayPicture" fitHeight="60.0" fitWidth="60.0" pickOnBounds="true"
-                   preserveRatio="true" />
+        <!-- Size is set by DialogBox, which must match it to the circular clip. -->
+        <ImageView fx:id="displayPicture" pickOnBounds="true" preserveRatio="true" />
     </children>
 </fx:root>

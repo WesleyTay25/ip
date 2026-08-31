@@ -34,7 +34,7 @@ public class MainWindow {
 
     private LebronJames lebronJames;
     private final Image userImage = loadImage("/images/DaUser.png");
-    private final Image lebronImage = loadImage("/images/DaLebron.png");
+    private final Image lebronImage = loadImage("/images/DaLebron.jpg");
 
     /**
      * Prepares the window once the FXML loader has built it.
