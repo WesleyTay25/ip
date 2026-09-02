@@ -20,6 +20,60 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
 
+## Running the app
+
+Prerequisite: **Java 25**. The Gradle build pins its toolchain to Java 25, so
+the app will not start on an older JDK. On macOS, switch to it with:
+
+```
+sdk use java 25.0.3.fx-zulu
+```
+
+`sdk use` applies only to the terminal window you type it in, so a new tab or
+shell needs it again.
+
+Run every command below from the project root (use `gradlew.bat` instead of
+`./gradlew` on Windows).
+
+### The GUI - the normal way to run it
+
+```
+./gradlew run
+```
+
+This compiles the current source, then starts `lebronjames.Launcher`, which
+opens the JavaFX window. Because it recompiles first, it always runs your
+latest code, so this is the command to use while working on the project. Once
+the greeting appears, type a command such as `list` into the text field at the
+bottom and press Enter.
+
+### From the packaged JAR
+
+```
+./gradlew shadowJar
+java -jar build/libs/lebronjames.jar
+```
+
+This runs the same GUI, but from the self-contained JAR described under
+[Packaging the app as a JAR file](#packaging-the-app-as-a-jar-file). Use it to
+check what someone receiving the JAR would see; it is not needed for everyday
+development, since the JAR is only rebuilt when you ask for it.
+
+### The text interface
+
+`LebronJames` keeps a `main` of its own that runs the chatbot in the terminal
+rather than in a window, which is useful for a quick check without the GUI:
+
+```
+./gradlew classes
+java -cp build/classes/java/main:build/resources/main lebronjames.LebronJames
+```
+
+Gradle's `run` task is wired to `Launcher`, so the text interface has to be
+started by naming its class directly. It does not touch JavaFX, so no module
+path is required. On Windows, separate the two classpath entries with `;`
+instead of `:`.
+
 ## Building and running with Gradle
 
 The project uses the Gradle wrapper, so Gradle itself does not need to be
@@ -28,7 +82,7 @@ the project root (use `gradlew.bat` instead of `./gradlew` on Windows).
 
 | Command | What it does |
 | --- | --- |
-| `./gradlew run` | Compiles the chatbot and runs it, with the console connected so you can type commands. |
+| `./gradlew run` | Compiles the chatbot and starts the GUI (see [Running the app](#running-the-app)). |
 | `./gradlew build` | Compiles, runs the tests, and packages the app into `build/libs/lebronjames.jar`. |
 | `./gradlew shadowJar` | Builds just that JAR, without running the tests. |
 | `./gradlew test` | Runs the JUnit tests. |
