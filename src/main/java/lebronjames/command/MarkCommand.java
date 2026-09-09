@@ -33,12 +33,9 @@ public class MarkCommand extends Command {
         Task task = tasks.get(taskNumber);
         if (isDone) {
             task.markAsDone();
-        } else {
-            task.markAsNotDone();
-        }
-        if (isDone) {
             ui.showTaskMarked(task);
         } else {
+            task.markAsNotDone();
             ui.showTaskUnmarked(task);
         }
         storage.save(tasks.asList());
