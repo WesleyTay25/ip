@@ -39,6 +39,10 @@ public class TaskList {
      * @param tasks Tasks to start with.
      */
     public TaskList(ArrayList<Task> tasks) {
+        // Storage.load() hands back an empty list when there is no save file, so
+        // it never returns null. Null here would mean that contract was broken.
+        assert tasks != null : "A task list must be created from a real list";
+
         this.tasks = tasks;
     }
 
@@ -57,7 +61,16 @@ public class TaskList {
      * @param task Task to add.
      */
     public void add(Task task) {
+        // Parser either returns a fully built task or throws, so it cannot hand
+        // an AddCommand a null one.
+        assert task != null : "Cannot add a null task";
+
+        int sizeBefore = tasks.size();
         tasks.add(task);
+
+        // Guards against a future change swapping in a collection that refuses
+        // duplicates, which would silently drop a task the user was told was added.
+        assert tasks.size() == sizeBefore + 1 : "Adding a task must grow the list by exactly one";
     }
 
     /**
@@ -69,7 +82,15 @@ public class TaskList {
      */
     public Task remove(int taskNumber) throws LebronJamesException {
         Task task = get(taskNumber);
+
+        int sizeBefore = tasks.size();
         tasks.remove(taskNumber - 1);
+
+        // remove(int) removes by position, not by value. Asserting the size
+        // change catches an accidental switch to remove(Object), which would
+        // delete the first equal task instead of the numbered one.
+        assert tasks.size() == sizeBefore - 1 : "Removing a task must shrink the list by exactly one";
+
         return task;
     }
 
@@ -85,7 +106,13 @@ public class TaskList {
             throw new LebronJamesException(
                     "Oops! Task " + taskNumber + " does not exist. Enter a number shown by list.");
         }
-        return tasks.get(taskNumber - 1);
+        Task task = tasks.get(taskNumber - 1);
+
+        // Nothing ever puts a null into the list, and every caller immediately
+        // marks, deletes, or prints what it gets back.
+        assert task != null : "The task list must never hold a null task";
+
+        return task;
     }
 
     /**
@@ -103,6 +130,11 @@ public class TaskList {
                 matchingTasks.add(task);
             }
         }
+
+        // A filter can only ever narrow the list, so a longer result would mean
+        // tasks were being duplicated into it.
+        assert matchingTasks.size() <= tasks.size() : "A search cannot return more tasks than the list holds";
+
         return matchingTasks;
     }
 
@@ -125,6 +157,10 @@ public class TaskList {
                 matchingTasks.add(task);
             }
         }
+
+        // As above: filtering cannot invent tasks that are not in the list.
+        assert matchingTasks.size() <= tasks.size() : "A search cannot return more tasks than the list holds";
+
         return matchingTasks;
     }
 
