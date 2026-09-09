@@ -2,6 +2,7 @@ package lebronjames.task;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import lebronjames.LebronJamesException;
@@ -13,7 +14,9 @@ import lebronjames.LebronJamesException;
  * <p>This class wraps an {@code ArrayList<Task>} rather than extending it. That
  * keeps the chatbot's vocabulary small and deliberate: the rest of the program
  * can add, delete, and search tasks, but cannot reach in and, say, sort or
- * shuffle the list in ways the save file was never designed for.
+ * shuffle the list in ways the save file was never designed for. The list
+ * itself is never handed out; {@link #asList()} returns an unmodifiable view,
+ * so that promise holds in code and not only in this comment.
  *
  * <p>It is also where a task number is turned into a task. Doing the range
  * check here means every command that names a task &mdash; mark, unmark,
@@ -156,11 +159,18 @@ public class TaskList {
     }
 
     /**
-     * Returns all tasks, in list order, for displaying or saving.
+     * Returns a read-only view of all tasks, in list order, for displaying or
+     * saving.
      *
-     * @return The tasks currently stored.
+     * <p>The view reflects later changes made through this TaskList, but cannot
+     * itself be used to make them.
+     *
+     * @return The tasks currently stored, as an unmodifiable list.
      */
     public List<Task> asList() {
-        return tasks;
+        // A view rather than a copy: every caller only reads the list, so
+        // copying would allocate on each save for no benefit, while a view
+        // still refuses changes attempted behind this class's back.
+        return Collections.unmodifiableList(tasks);
     }
 }
