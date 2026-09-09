@@ -228,4 +228,27 @@ public class TaskListTest {
     public void findTasksOn_noMatches_emptyListNotNull() {
         assertTrue(new TaskList().findTasksOn(LocalDate.of(2019, 12, 2)).isEmpty());
     }
+
+    @Test
+    public void asList_callerTriesToModify_unsupportedOperationThrown() {
+        TaskList tasks = listOf(2);
+        List<Task> view = tasks.asList();
+
+        // The point of the view is that a caller cannot add or remove tasks
+        // without TaskList knowing, which is what keeps the save file in step.
+        assertThrows(UnsupportedOperationException.class, () -> view.add(new Todo("sneaked in")));
+        assertThrows(UnsupportedOperationException.class, () -> view.remove(0));
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void asList_taskAddedAfterwards_viewShowsIt() {
+        TaskList tasks = listOf(1);
+        List<Task> view = tasks.asList();
+
+        tasks.add(new Todo("added later"));
+
+        // A view, not a snapshot: Storage saves whatever the list holds now.
+        assertEquals(2, view.size());
+    }
 }
