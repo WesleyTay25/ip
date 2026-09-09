@@ -39,6 +39,11 @@ public class Parser {
      *     recognised command word in the wrong format.
      */
     public static Command parse(String fullCommand) throws LebronJamesException {
+        // A blank line is ordinary user input and is reported below, but null is
+        // not something the user can type: Ui.readCommand() and the GUI text
+        // field both always hand over a string.
+        assert fullCommand != null : "A command line must not be null";
+
         if (fullCommand.equals("bye")) {
             return new ExitCommand();
         }
@@ -106,6 +111,10 @@ public class Parser {
      * @throws LebronJamesException If no description was given.
      */
     private static Todo parseTodo(String fullCommand) throws LebronJamesException {
+        // The offset 5 below is "todo " counted out by hand. It is only correct
+        // because parse() has already matched the command word, so record that.
+        assert isCommand(fullCommand, "todo") : "parseTodo handles only todo commands";
+
         String description = fullCommand.length() > 5 ? fullCommand.substring(5).trim() : "";
         if (description.isEmpty()) {
             throw new LebronJamesException("Oops! A todo needs a description. Try: todo <task>");
@@ -121,6 +130,9 @@ public class Parser {
      * @throws LebronJamesException If {@code /by} is missing, or either part is empty.
      */
     private static Deadline parseDeadline(String fullCommand) throws LebronJamesException {
+        // The offset 9 below is the length of "deadline ".
+        assert isCommand(fullCommand, "deadline") : "parseDeadline handles only deadline commands";
+
         int byIndex = fullCommand.indexOf(" /by ");
         if (byIndex == -1) {
             throw new LebronJamesException("Oops! Use this deadline format: deadline <task> /by <deadline>");
@@ -145,6 +157,9 @@ public class Parser {
      * @throws LebronJamesException If {@code /from} or {@code /to} is missing, or any part is empty.
      */
     private static Event parseEvent(String fullCommand) throws LebronJamesException {
+        // The offset 6 below is the length of "event ".
+        assert isCommand(fullCommand, "event") : "parseEvent handles only event commands";
+
         int fromIndex = fullCommand.indexOf(" /from ");
         int toIndex = fromIndex == -1 ? -1 : fullCommand.indexOf(" /to ", fromIndex + 7);
         if (fromIndex == -1 || toIndex == -1) {
@@ -174,6 +189,9 @@ public class Parser {
      * @throws LebronJamesException If the date is missing or not in an accepted format.
      */
     private static OnCommand parseOn(String fullCommand) throws LebronJamesException {
+        // The offset 2 below is the length of "on".
+        assert isCommand(fullCommand, "on") : "parseOn handles only on commands";
+
         String dateText = fullCommand.substring(2).trim();
         if (dateText.isEmpty()) {
             throw new LebronJamesException("Oops! The on command needs a date. Try: on 2019-12-02");
@@ -189,6 +207,9 @@ public class Parser {
      * @throws LebronJamesException If no keyword was given.
      */
     private static FindCommand parseFind(String fullCommand) throws LebronJamesException {
+        // The offset 4 below is the length of "find".
+        assert isCommand(fullCommand, "find") : "parseFind handles only find commands";
+
         String keyword = fullCommand.substring(4).trim();
         if (keyword.isEmpty()) {
             throw new LebronJamesException("Oops! The find command needs a keyword. Try: find book");
@@ -209,6 +230,10 @@ public class Parser {
      * @throws LebronJamesException If the task number is missing or not a whole number.
      */
     private static int parseTaskNumber(String fullCommand, String commandName) throws LebronJamesException {
+        // Unlike the helpers above this one measures the command word instead of
+        // hard-coding its length, but it still relies on that word being present.
+        assert isCommand(fullCommand, commandName) : "The command word must match the line being parsed";
+
         String numberText = fullCommand.substring(commandName.length()).trim();
         if (numberText.isEmpty()) {
             throw new LebronJamesException("Oops! The " + commandName + " command needs a task number.");

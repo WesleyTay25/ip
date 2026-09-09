@@ -122,6 +122,10 @@ public class Ui {
      * @param taskCount Number of tasks restored from the save file.
      */
     public void showLoaded(int taskCount) {
+        // The count comes straight from List.size(), so a negative value would
+        // mean the caller had passed something other than a real list size.
+        assert taskCount >= 0 : "A task count can never be negative";
+
         if (taskCount > 0) {
             say("I loaded " + taskCount + " saved task(s). Type list to see them.");
         }

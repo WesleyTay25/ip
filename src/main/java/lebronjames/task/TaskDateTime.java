@@ -68,6 +68,11 @@ public class TaskDateTime {
      * @param time Time of day, or {@code null} if none was given.
      */
     private TaskDateTime(LocalDate date, LocalTime time) {
+        // parse() is the only caller and always supplies a date it has just
+        // parsed successfully. The time is deliberately not checked: null is its
+        // documented value for "the user gave a date only".
+        assert date != null : "A TaskDateTime must always carry a date";
+
         this.date = date;
         this.time = time;
     }
@@ -99,6 +104,11 @@ public class TaskDateTime {
      * @throws LebronJamesException If the text does not match any accepted format.
      */
     public static TaskDateTime parse(String text) throws LebronJamesException {
+        // Callers pass either a slice of the user's command or a field read from
+        // the save file. Both are always strings, so null indicates a bug rather
+        // than something the user could have typed.
+        assert text != null : "Text to parse as a date must not be null";
+
         String trimmedText = text.strip();
 
         for (DateTimeFormatter format : DATE_TIME_FORMATS) {
