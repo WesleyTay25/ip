@@ -117,6 +117,11 @@ public class LebronJames {
     public String getResponse(String fullCommand) {
         try {
             Command command = Parser.parse(fullCommand);
+
+            // Parser signals every problem by throwing, so reaching this line
+            // means a real command was understood.
+            assert command != null : "Parser must return a command or throw";
+
             command.execute(tasks, ui, storage);
             isExit = command.isExit();
         } catch (LebronJamesException exception) {
@@ -164,6 +169,11 @@ public class LebronJames {
     private static TaskList loadTasks(Storage storage, Ui ui) {
         try {
             ArrayList<Task> savedTasks = storage.load();
+
+            // A missing save file yields an empty list rather than null, which is
+            // what lets start-up carry on without a special case for a first run.
+            assert savedTasks != null : "Storage.load returns an empty list, never null";
+
             ui.showLoaded(savedTasks.size());
             return new TaskList(savedTasks);
         } catch (LebronJamesException exception) {
