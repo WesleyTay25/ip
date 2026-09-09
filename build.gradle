@@ -51,6 +51,11 @@ dependencies {
 test {
     useJUnitPlatform()
 
+    // An assert is ignored unless the JVM is started with -ea. Gradle already
+    // does this for tests, but saying so keeps the intent visible: a broken
+    // assumption should surface as a failing test, not pass unnoticed.
+    enableAssertions = true
+
     testLogging {
         events "passed", "skipped", "failed"
 
@@ -102,6 +107,11 @@ shadowJar {
 }
 
 run {
+    // Unlike the test task, JavaExec leaves assertions off by default, so
+    // without this line every assert in the code would be dead weight when the
+    // app is run through Gradle.
+    enableAssertions = true
+
     // Harmless for the GUI, but it means "gradlew run -PmainClass=..." style
     // console use, and the text interface generally, still receives keystrokes.
     // Without it a console run would see no input at all and exit immediately.

@@ -43,6 +43,11 @@ public class Storage {
      * @param remainingPathParts Remaining names, for example {@code "lebronjames.txt"}.
      */
     public Storage(String firstPathPart, String... remainingPathParts) {
+        // The path parts are compile-time constants in LebronJames, so a blank
+        // first part would mean the save file had silently become the working
+        // directory itself.
+        assert firstPathPart != null && !firstPathPart.isBlank() : "A save path needs a non-blank first part";
+
         this.filePath = Path.of(firstPathPart, remainingPathParts);
     }
 
@@ -98,6 +103,9 @@ public class Storage {
      * @throws LebronJamesException If the tasks cannot be written to disk.
      */
     public void save(List<Task> tasks) throws LebronJamesException {
+        // Every caller passes TaskList.asList(), which returns the live list.
+        assert tasks != null : "Cannot save a null task list";
+
         List<String> lines = new ArrayList<>();
         for (Task task : tasks) {
             lines.add(task.toFileFormat());
@@ -159,6 +167,11 @@ public class Storage {
             default:
                 throw new LebronJamesException("Unknown task type: " + type);
         }
+
+        // Records that the switch above is exhaustive: each known type assigns a
+        // task and the default branch throws, so there is no path that falls
+        // through leaving nothing built.
+        assert task != null : "Every task type must either build a task or throw";
 
         if (isDone) {
             task.markAsDone();
