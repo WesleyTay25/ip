@@ -98,10 +98,9 @@ public class Storage {
      * @throws LebronJamesException If the tasks cannot be written to disk.
      */
     public void save(List<Task> tasks) throws LebronJamesException {
-        List<String> lines = new ArrayList<>();
-        for (Task task : tasks) {
-            lines.add(task.toFileFormat());
-        }
+        List<String> lines = tasks.stream()
+                .map(Task::toFileFormat)
+                .toList();
 
         try {
             Path parentDirectory = filePath.getParent();

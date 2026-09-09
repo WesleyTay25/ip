@@ -91,16 +91,12 @@ public class TaskList {
      * <p>To-dos are never included because they carry no date.
      *
      * @param date Date the user asked about.
-     * @return Tasks scheduled on that date, in list order.
+     * @return Tasks scheduled on that date, in list order, as an unmodifiable list.
      */
     public List<Task> findTasksOn(LocalDate date) {
-        List<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.isOn(date)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> task.isOn(date))
+                .toList();
     }
 
     /**
@@ -112,17 +108,13 @@ public class TaskList {
      * someone half-remembering what they typed.
      *
      * @param keyword Text to look for.
-     * @return Matching tasks, in list order.
+     * @return Matching tasks, in list order, as an unmodifiable list.
      */
     public List<Task> findTasksWithKeyword(String keyword) {
         String lowerCaseKeyword = keyword.toLowerCase();
-        List<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getDescription().toLowerCase().contains(lowerCaseKeyword)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase().contains(lowerCaseKeyword))
+                .toList();
     }
 
     /**
