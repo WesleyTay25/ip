@@ -251,4 +251,38 @@ public class TaskListTest {
         // A view, not a snapshot: Storage saves whatever the list holds now.
         assertEquals(2, view.size());
     }
+
+    @Test
+    public void findDuplicateNumber_noSuchTask_noDuplicateReturned() {
+        assertEquals(TaskList.NO_DUPLICATE, listOf(3).findDuplicateNumber(new Todo("read book")));
+    }
+
+    @Test
+    public void findDuplicateNumber_emptyList_noDuplicateReturned() {
+        assertEquals(TaskList.NO_DUPLICATE, new TaskList().findDuplicateNumber(new Todo("read book")));
+    }
+
+    @Test
+    public void findDuplicateNumber_taskPresent_oneBasedNumberReturned() {
+        // listOf builds "task 1".."task 3", so the match is the second one and
+        // must be reported as 2, the number the user sees in the list.
+        assertEquals(2, listOf(3).findDuplicateNumber(new Todo("task 2")));
+    }
+
+    @Test
+    public void findDuplicateNumber_severalCopies_firstOneReported() {
+        // A save file written before duplicates were refused can still hold two
+        // copies; pointing at the first is the stable answer.
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        tasks.add(new Todo("write essay"));
+        tasks.add(new Todo("read book"));
+
+        assertEquals(1, tasks.findDuplicateNumber(new Todo("read book")));
+    }
+
+    @Test
+    public void findDuplicateNumber_differsOnlyInCase_stillFound() {
+        assertEquals(2, listOf(3).findDuplicateNumber(new Todo("TASK 2")));
+    }
 }

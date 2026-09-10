@@ -14,6 +14,11 @@ import lebronjames.ui.Ui;
  * adding it is the same work in all three cases. Splitting this into
  * AddTodoCommand, AddDeadlineCommand, and AddEventCommand would give three
  * classes with identical bodies.
+ *
+ * <p>This is also where a task the user already has is turned away. The check
+ * lives here rather than in {@link TaskList} because refusing to add is a
+ * decision about this command: the task list still answers whether a duplicate
+ * exists, but adding is the only situation in which that answer is a problem.
  */
 public class AddCommand extends Command {
     private final Task task;
@@ -29,6 +34,13 @@ public class AddCommand extends Command {
 
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws LebronJamesException {
+        int duplicateNumber = tasks.findDuplicateNumber(task);
+        if (duplicateNumber != TaskList.NO_DUPLICATE) {
+            throw new LebronJamesException("Oops! You already have that task, as number "
+                    + duplicateNumber + ":\n  " + task
+                    + "\nIf you really need it twice, give one of them a different description.");
+        }
+
         tasks.add(task);
         ui.showTaskAdded(task, tasks.size());
         storage.save(tasks.asList());

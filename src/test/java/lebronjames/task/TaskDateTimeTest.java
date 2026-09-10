@@ -1,6 +1,7 @@
 package lebronjames.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
@@ -119,5 +120,32 @@ public class TaskDateTimeTest {
 
             assertEquals(saved, TaskDateTime.parse(saved).toFileFormat(), "round trip failed for: " + typed);
         }
+    }
+
+    @Test
+    public void equals_sameDateWrittenTwoWays_equal() throws LebronJamesException {
+        // The two accepted formats mean the same day, so they must compare equal
+        // or duplicate detection would depend on how the user typed the date.
+        assertEquals(TaskDateTime.parse("2019-12-02"), TaskDateTime.parse("2/12/2019"));
+    }
+
+    @Test
+    public void equals_sameDateAndTime_equalWithMatchingHashCode() throws LebronJamesException {
+        TaskDateTime first = TaskDateTime.parse("2019-12-02 1800");
+        TaskDateTime second = TaskDateTime.parse("2019-12-02 1800");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    public void equals_dateOnlyVersusDateWithTime_notEqual() throws LebronJamesException {
+        // "by Monday" and "by Monday 6pm" are different instructions.
+        assertNotEquals(TaskDateTime.parse("2019-12-02"), TaskDateTime.parse("2019-12-02 1800"));
+    }
+
+    @Test
+    public void equals_differentDates_notEqual() throws LebronJamesException {
+        assertNotEquals(TaskDateTime.parse("2019-12-02"), TaskDateTime.parse("2019-12-03"));
     }
 }

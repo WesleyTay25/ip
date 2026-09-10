@@ -93,6 +93,43 @@ public abstract class Task {
      */
     public abstract String toFileFormat();
 
+    /**
+     * Returns whether the given object is the same task as this one.
+     *
+     * <p>Two tasks are the same when they are of the same kind and carry the
+     * same description, ignoring capitalisation, so that adding "read book"
+     * twice is recognised however it was typed. Subclasses that carry dates
+     * extend this to compare those too.
+     *
+     * <p>Completion status is deliberately left out. A task the user has
+     * already ticked off is still the same task, so marking one done must not
+     * make room for a second copy of it.
+     *
+     * @param other Object to compare with.
+     * @return Whether it is a task of the same kind with the same description.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        // getClass rather than instanceof: a Todo and a Deadline that happen to
+        // share a description are different tasks, not duplicates.
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
+        Task otherTask = (Task) other;
+        return description.equalsIgnoreCase(otherTask.description);
+    }
+
+    @Override
+    public int hashCode() {
+        // Lower-cased to stay consistent with the case-insensitive equals above:
+        // two objects that are equal must never have different hash codes.
+        return description.toLowerCase().hashCode();
+    }
+
     @Override
     public String toString() {
         return "[" + getStatusIcon() + "] " + description;

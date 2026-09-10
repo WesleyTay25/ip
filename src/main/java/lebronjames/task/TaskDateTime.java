@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.util.Objects;
 
 import lebronjames.LebronJamesException;
 
@@ -157,6 +158,39 @@ public class TaskDateTime {
             return date.format(FILE_DATE_FORMAT);
         }
         return date.format(FILE_DATE_FORMAT) + " " + time.format(FILE_TIME_FORMAT);
+    }
+
+    /**
+     * Returns whether the given object is the same point in time.
+     *
+     * <p>Without this, two TaskDateTime objects parsed from the same text would
+     * compare as different simply because they are different objects, and
+     * duplicate detection would never match two deadlines on the same day.
+     *
+     * <p>A date-only value is deliberately not equal to the same date with a
+     * time on it: "return book by Monday" and "return book by Monday 6pm" say
+     * different things.
+     *
+     * @param other Object to compare with.
+     * @return Whether it is a TaskDateTime with the same date and time.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof TaskDateTime)) {
+            return false;
+        }
+
+        TaskDateTime otherDateTime = (TaskDateTime) other;
+        // The time may legitimately be null, so it cannot be compared directly.
+        return date.equals(otherDateTime.date) && Objects.equals(time, otherDateTime.time);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, time);
     }
 
     @Override

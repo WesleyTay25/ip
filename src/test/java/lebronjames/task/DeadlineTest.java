@@ -2,6 +2,7 @@ package lebronjames.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
@@ -90,5 +91,17 @@ public class DeadlineTest {
         // The time of day must not affect which day the deadline falls on.
         assertTrue(deadlineDue("2019-06-06 2359").isOn(LocalDate.of(2019, 6, 6)));
         assertTrue(deadlineDue("2019-06-06 0000").isOn(LocalDate.of(2019, 6, 6)));
+    }
+
+    @Test
+    public void equals_sameDescriptionAndDate_equalWithMatchingHashCode() throws LebronJamesException {
+        assertEquals(deadlineDue("2019-06-06"), deadlineDue("2019-06-06"));
+        assertEquals(deadlineDue("2019-06-06").hashCode(), deadlineDue("2019-06-06").hashCode());
+    }
+
+    @Test
+    public void equals_sameDescriptionDifferentDate_notEqual() throws LebronJamesException {
+        // A repeating chore is a real case: same words, genuinely two tasks.
+        assertNotEquals(deadlineDue("2019-06-06"), deadlineDue("2019-06-13"));
     }
 }

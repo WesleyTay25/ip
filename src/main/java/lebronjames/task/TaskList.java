@@ -23,6 +23,13 @@ import lebronjames.LebronJamesException;
  * delete &mdash; reports an out-of-range number the same way.
  */
 public class TaskList {
+    /**
+     * Returned by {@link #findDuplicateNumber(Task)} when the list holds no
+     * task equal to the one asked about. Tasks are numbered from one, so zero
+     * cannot be mistaken for a real task number.
+     */
+    public static final int NO_DUPLICATE = 0;
+
     private final ArrayList<Task> tasks;
 
     /**
@@ -113,6 +120,28 @@ public class TaskList {
         assert task != null : "The task list must never hold a null task";
 
         return task;
+    }
+
+    /**
+     * Returns the number of the task already on the list that is the same as
+     * the given one, or {@link #NO_DUPLICATE} if there is none.
+     *
+     * <p>What counts as "the same" is decided by the task itself, in
+     * {@link Task#equals(Object)}: same kind, same description ignoring
+     * capitalisation, and the same dates where the kind carries any.
+     *
+     * <p>The number is returned rather than a plain yes or no so the chatbot
+     * can point the user at the task that is already there.
+     *
+     * @param task Task being considered for adding.
+     * @return One-based number of the existing duplicate, or NO_DUPLICATE.
+     */
+    public int findDuplicateNumber(Task task) {
+        assert task != null : "Cannot look for a duplicate of a null task";
+
+        // indexOf compares with equals, which is what defines a duplicate here.
+        int index = tasks.indexOf(task);
+        return index == -1 ? NO_DUPLICATE : index + 1;
     }
 
     /**
