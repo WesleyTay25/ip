@@ -2,6 +2,7 @@ package lebronjames.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
@@ -78,5 +79,26 @@ public class EventTest {
 
         assertTrue(event.isOn(LocalDate.of(2019, 8, 6)));
         assertFalse(event.isOn(LocalDate.of(2019, 8, 7)));
+    }
+
+    @Test
+    public void equals_sameDescriptionAndBothDates_equal() throws LebronJamesException {
+        Event first = new Event("project meeting",
+                TaskDateTime.parse("2019-08-06 1400"), TaskDateTime.parse("2019-08-06 1600"));
+        Event second = new Event("project meeting",
+                TaskDateTime.parse("2019-08-06 1400"), TaskDateTime.parse("2019-08-06 1600"));
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    public void equals_sameDescriptionDifferentEnd_notEqual() throws LebronJamesException {
+        Event shorter = new Event("project meeting",
+                TaskDateTime.parse("2019-08-06 1400"), TaskDateTime.parse("2019-08-06 1600"));
+        Event longer = new Event("project meeting",
+                TaskDateTime.parse("2019-08-06 1400"), TaskDateTime.parse("2019-08-06 1800"));
+
+        assertNotEquals(shorter, longer);
     }
 }
