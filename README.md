@@ -94,6 +94,13 @@ The app ships as a single executable "fat" JAR: it holds the compiled classes
 and every dependency, so it runs on any machine with Java 25 installed and
 nothing else.
 
+The JavaFX native libraries for **64-bit Windows, 64-bit Linux and Apple
+Silicon macOS** are all packed into that one file, so the same download works on
+any of the three. Only one processor architecture per operating system can be
+included, because every JavaFX build names its libraries identically and a flat
+JAR can hold only one file of a given name. For an Intel Mac, change
+`mac-aarch64` to `mac` in the platform list in `build.gradle` and rebuild.
+
 **To create it**, run this from the project root:
 
 ```
