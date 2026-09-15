@@ -1,16 +1,24 @@
 /*
- * Styling for the chat window.
+ * The King's colours on the polished layout: the purple and gold of the jersey
+ * the chatbot is named after.
  *
- * Two font families are used on purpose. The chatbot's banner and its numbered
- * task lists are lined up with spaces, so a monospaced font is not decoration
- * for a reply: in a proportional font the basketball drawing and the columns of
- * the list both come out crooked. A command carries no such layout, so it is
- * set in the system font, which makes the two voices distinguishable at a
- * glance even before their colours are noticed.
+ * Colour is doing the same job here as the wording in Ui and the crowned
+ * basketball in the banner, which is to make the chatbot recognisable as one
+ * character rather than a generic task list. Gold is kept for the user's own
+ * commands and jersey purple for the King's replies, so the two voices stay
+ * apart at a glance.
+ *
+ * Two font families are used on purpose. The banner and the numbered playbook
+ * are lined up with spaces, so a monospaced font is not decoration for a reply:
+ * in a proportional font the crowned basketball and the columns of the list
+ * both come out crooked. Courier is asked for ahead of Menlo there, for its
+ * heavier, scoreboard-like look. A command carries no such layout, so it keeps
+ * the system font, which separates the two voices before their colours are even
+ * noticed.
  */
 
 .chat-window {
-    -fx-background-color: #eef1f6;
+    -fx-background-color: #2b1350;
 }
 
 /*
@@ -41,58 +49,61 @@
 }
 
 /*
- * A command the user typed: compact, tinted, and pushed to the right. It keeps
+ * A command the user typed: compact, gold, and pushed to the right. It keeps
  * the default system font, which is what sets it apart from the monospaced
  * replies below.
  */
 .command-label {
-    -fx-background-color: #2f6fed;
-    -fx-text-fill: white;
+    -fx-background-color: #fdb927;
+    -fx-text-fill: #241042;
     /* Squared off on the side nearest the user, so the bubble points at them. */
     -fx-background-radius: 12px 12px 3px 12px;
 }
 
-/* A reply from the chatbot: full width, on a card that lifts off the backdrop. */
+/* A reply from the King: jersey purple with a gold trim. */
 .reply-label {
-    -fx-font-family: "Menlo", "Consolas", monospace;
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #1c2230;
+    -fx-font-family: "Courier New", "Menlo", "Consolas", monospace;
+    -fx-background-color: #552583;
+    -fx-text-fill: #f7f2ff;
     -fx-background-radius: 12px 12px 12px 3px;
-    -fx-border-color: #d7dceb;
+    -fx-border-color: #fdb927;
     -fx-border-radius: 12px 12px 12px 3px;
 }
 
 /*
- * A complaint about a bad command. The red fill and the heavier left edge are
- * what make a typo visible without reading, which is the point of the rule.
+ * A complaint about a bad command. Red rather than purple, with a heavier left
+ * edge, so an airball is visible without reading, which is the point of the
+ * rule. The fill is dark enough to sit on the purple backdrop without glowing.
  */
 .error-label {
-    -fx-font-family: "Menlo", "Consolas", monospace;
-    -fx-background-color: #fdeaea;
-    -fx-text-fill: #93231f;
+    -fx-font-family: "Courier New", "Menlo", "Consolas", monospace;
+    -fx-background-color: #5c1020;
+    -fx-text-fill: #ffd7d4;
     -fx-background-radius: 12px 12px 12px 3px;
-    -fx-border-color: #e4948f;
+    -fx-border-color: #e0524c;
     -fx-border-radius: 12px 12px 12px 3px;
     -fx-border-width: 1px 1px 1px 3px;
 }
 
 .input-row {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #d7dceb transparent transparent transparent;
+    -fx-background-color: #241042;
+    -fx-border-color: #4a2a7a transparent transparent transparent;
     -fx-border-width: 1px;
 }
 
 .text-field {
+    -fx-font-family: "Courier New", "Menlo", "Consolas", monospace;
     -fx-font-size: 12.5px;
     -fx-pref-height: 32px;
-    -fx-background-color: #eef1f6;
+    -fx-background-color: #efe9f7;
     -fx-background-radius: 16px;
     -fx-padding: 0 12px 0 12px;
-    -fx-prompt-text-fill: #8a93a8;
+    -fx-text-fill: #241042;
+    -fx-prompt-text-fill: #7a6a95;
 }
 
 .text-field:focused {
-    -fx-background-color: #e3e9f8;
+    -fx-background-color: #ffffff;
     -fx-effect: none;
 }
 
@@ -100,14 +111,14 @@
     -fx-font-size: 12.5px;
     -fx-font-weight: bold;
     -fx-pref-height: 32px;
-    -fx-background-color: #2f6fed;
+    -fx-background-color: #fdb927;
     -fx-background-radius: 16px;
-    -fx-text-fill: white;
+    -fx-text-fill: #2b1350;
     -fx-cursor: hand;
 }
 
 .button:hover {
-    -fx-background-color: #2559c4;
+    -fx-background-color: #ffcb57;
 }
 
 .button:disabled {

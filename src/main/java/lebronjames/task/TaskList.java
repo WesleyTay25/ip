@@ -111,7 +111,7 @@ public class TaskList {
     public Task get(int taskNumber) throws LebronJamesException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new LebronJamesException(
-                    "Oops! Task " + taskNumber + " does not exist. Enter a number shown by list.");
+                    "AIRBALL. Play " + taskNumber + " is not on the board. Enter a number shown by list.");
         }
         Task task = tasks.get(taskNumber - 1);
 

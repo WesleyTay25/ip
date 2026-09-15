@@ -129,7 +129,7 @@ public class TaskDateTime {
             }
         }
 
-        throw new LebronJamesException("Oops! I could not understand the date '" + trimmedText
+        throw new LebronJamesException("AIRBALL. I could not read the date '" + trimmedText
                 + "'.\nPlease use " + ACCEPTED_FORMATS + ".");
     }
 

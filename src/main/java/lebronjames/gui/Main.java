@@ -53,7 +53,7 @@ public class Main extends Application {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/view/MainWindow.fxml"));
             Parent root = fxmlLoader.load();
             stage.setScene(new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT));
-            stage.setTitle("Lebron James");
+            stage.setTitle("LeBron James 👑 The King");
             stage.setMinWidth(MINIMUM_WIDTH);
             stage.setMinHeight(MINIMUM_HEIGHT);
 

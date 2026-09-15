@@ -36,7 +36,7 @@ public class AddCommand extends Command {
     public void execute(TaskList tasks, Ui ui, Storage storage) throws LebronJamesException {
         int duplicateNumber = tasks.findDuplicateNumber(task);
         if (duplicateNumber != TaskList.NO_DUPLICATE) {
-            throw new LebronJamesException("Oops! You already have that task, as number "
+            throw new LebronJamesException("TRAVELLING! That play is already on the board, as number "
                     + duplicateNumber + ":\n  " + task
                     + "\nIf you really need it twice, give one of them a different description.");
         }

@@ -17,6 +17,13 @@ import lebronjames.task.TaskDateTime;
  * calls {@code System.out} directly. Wording and layout can then be changed in
  * one place, and the task-handling classes stay free of display details.
  *
+ * <p>This class is also where the chatbot's character lives. It speaks as
+ * LeBron James, "The King": tasks are plays, the task list is the playbook, a
+ * completed task is a bucket, and a command it cannot read is an airball. The
+ * voice belongs here rather than being sprinkled through the command classes,
+ * so rewording the chatbot means editing one file. The matching colours are in
+ * {@code /view/style.css} and the crowned basketball is the banner below.
+ *
  * <p>Replies are collected into a buffer rather than printed straight away.
  * {@link #getResponse()} hands back everything said since it was last called
  * and empties the buffer, so the same {@code Ui} serves both front ends: the
@@ -28,8 +35,16 @@ public class Ui {
     /** Horizontal rule the text interface prints above and below every reply. */
     public static final String SEPARATOR = "_".repeat(60);
 
-    /** Basketball drawn at start-up. */
-    private static final String BANNER = "       .-\"\"\"-.       \n"
+    /**
+     * Crowned basketball drawn at start-up.
+     *
+     * <p>The crown is the chatbot's badge: it is the first thing shown, and it
+     * says who is talking before a word has been read. The lines are padded
+     * rather than trimmed so the crown sits centred over the ball.
+     */
+    private static final String BANNER = "      /\\  /\\  /\\      \n"
+            + "     (==========)      \n"
+            + "       .-\"\"\"-.       \n"
             + "     .'  \\ | /  '.     \n"
             + "    /     \\|/     \\    \n"
             + "   ;-------+-------;   \n"
@@ -57,10 +72,15 @@ public class Ui {
      * Returns everything said since this method was last called, and clears the
      * buffer so the next reply starts empty.
      *
+     * <p>Only blank lines are trimmed, not indentation. Stripping every leading
+     * space would pull the first line of the crowned basketball flush against
+     * the margin while the lines below it kept their padding, which tips the
+     * crown over to one side.
+     *
      * @return Reply text, with no leading or trailing blank lines.
      */
     public String getResponse() {
-        String reply = response.toString().strip();
+        String reply = response.toString().replaceAll("^\\R+", "").stripTrailing();
         response.setLength(0);
         return reply;
     }
@@ -70,8 +90,8 @@ public class Ui {
      */
     public void showWelcome() {
         say(BANNER);
-        say("Hello! I'm Lebron James.");
-        say("What can I do for you?");
+        say("What's good? I'm LeBron James. They call me The King. 👑");
+        say("You call the plays, I'll run the offense.");
         showTaskInstructions();
     }
 
@@ -79,13 +99,13 @@ public class Ui {
      * Adds the accepted formats for adding each type of task.
      */
     public void showTaskInstructions() {
-        say("Add tasks using one of these formats:");
+        say("Call a play with one of these formats:");
         say("1. Todo: todo <task>");
         say("2. Deadline: deadline <task> /by <date>");
         say("3. Event: event <task> /from <date> /to <date>");
         say("Dates use " + TaskDateTime.ACCEPTED_FORMATS + ".");
-        say("See what is scheduled for one day with: on <date>");
-        say("Search your tasks with: find <keyword>");
+        say("Check the game plan for one day with: on <date>");
+        say("Scout your playbook with: find <keyword>");
     }
 
     /**
@@ -127,7 +147,7 @@ public class Ui {
         assert taskCount >= 0 : "A task count can never be negative";
 
         if (taskCount > 0) {
-            say("I loaded " + taskCount + " saved task(s). Type list to see them.");
+            say("I pulled " + taskCount + " play(s) off the old tape. Type list to run it back.");
         }
     }
 
@@ -138,7 +158,7 @@ public class Ui {
      */
     public void showLoadingError(String message) {
         say(message);
-        say("Starting with an empty list. Saving will overwrite that file.");
+        say("Starting the playbook empty. Saving will overwrite that file.");
     }
 
     /**
@@ -147,7 +167,7 @@ public class Ui {
      * @param tasks Tasks currently stored.
      */
     public void showTaskList(List<Task> tasks) {
-        say("Here are the tasks in your list:");
+        say("Here is your playbook:");
         showNumberedTasks(tasks);
     }
 
@@ -158,9 +178,9 @@ public class Ui {
      * @param taskCount Number of tasks currently stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        say("Got it. I've added this task:");
+        say("BUCKET! That play is on the board:");
         say("  " + task + " 🏀");
-        say("Now you have " + taskCount + " tasks in the list.");
+        say("That makes " + taskCount + " plays in the playbook.");
     }
 
     /**
@@ -170,9 +190,9 @@ public class Ui {
      * @param taskCount Number of tasks still stored.
      */
     public void showTaskRemoved(Task task, int taskCount) {
-        say("Noted. I've removed this task:");
+        say("Subbed out. That play is off the board:");
         say("  " + task + " 🏀");
-        say("Now you have " + taskCount + " tasks in the list.");
+        say("That leaves " + taskCount + " plays in the playbook.");
     }
 
     /**
@@ -181,7 +201,7 @@ public class Ui {
      * @param task Task that was marked.
      */
     public void showTaskMarked(Task task) {
-        say("Nice one bro! This task is done:");
+        say("AND-ONE! Chalk that one up:");
         say("  " + task + " 🏀");
     }
 
@@ -191,7 +211,7 @@ public class Ui {
      * @param task Task that was unmarked.
      */
     public void showTaskUnmarked(Task task) {
-        say("Oops this task is not done yet:");
+        say("Whistle blew. Back on the floor:");
         say("  " + task + " 🏀");
     }
 
@@ -203,11 +223,11 @@ public class Ui {
      */
     public void showTasksOn(List<Task> tasks, LocalDate date) {
         if (tasks.isEmpty()) {
-            say("Nothing scheduled on " + date.format(DISPLAY_DATE_FORMAT) + ". Enjoy the day off!");
+            say("No game on " + date.format(DISPLAY_DATE_FORMAT) + ". Rest day, put your feet up!");
             return;
         }
 
-        say("Here is what you have on " + date.format(DISPLAY_DATE_FORMAT) + ":");
+        say("Game plan for " + date.format(DISPLAY_DATE_FORMAT) + ":");
         showNumberedTasks(tasks);
     }
 
@@ -218,11 +238,11 @@ public class Ui {
      */
     public void showMatchingTasks(List<Task> tasks) {
         if (tasks.isEmpty()) {
-            say("No matching tasks in your list. Try another keyword!");
+            say("No plays match that. Run the scout again with another keyword!");
             return;
         }
 
-        say("Here are the matching tasks in your list:");
+        say("Here are the plays that match:");
         showNumberedTasks(tasks);
     }
 
@@ -230,7 +250,7 @@ public class Ui {
      * Adds the farewell message.
      */
     public void showGoodbye() {
-        say("Goodbye, I love basketball btw! 🏀");
+        say("Game over. Taking my talents home. 👑🏀");
     }
 
     /**
