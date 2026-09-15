@@ -1,19 +1,115 @@
 /*
- * Minimal styling for the chat window. The chatbot's banner and its numbered
+ * Styling for the chat window.
+ *
+ * Two font families are used on purpose. The chatbot's banner and its numbered
  * task lists are lined up with spaces, so a monospaced font is not decoration
- * here: in a proportional font the basketball drawing and the columns of the
- * list both come out crooked.
+ * for a reply: in a proportional font the basketball drawing and the columns of
+ * the list both come out crooked. A command carries no such layout, so it is
+ * set in the system font, which makes the two voices distinguishable at a
+ * glance even before their colours are noticed.
  */
 
-.dialog-label {
-    -fx-font-family: "Menlo", "Consolas", monospace;
-    -fx-font-size: 12px;
-    -fx-background-color: #e8eaf0;
-    -fx-background-radius: 10px;
-    -fx-padding: 8px;
+.chat-window {
+    -fx-background-color: #eef1f6;
 }
 
-/* Replies from the chatbot, tinted so the two speakers are easy to tell apart. */
+/*
+ * The scroll pane paints its own light grey by default, which would show as a
+ * border around the conversation. Both of these are needed: -fx-background is
+ * the pane's own fill and -fx-background-color the skin's.
+ */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.conversation {
+    -fx-padding: 8px 0 8px 0;
+}
+
+/* Shared by all three kinds of message; the kind-specific rules follow. */
+.dialog-label {
+    -fx-font-size: 12.5px;
+    -fx-background-radius: 12px;
+    -fx-padding: 7px 11px 7px 11px;
+    -fx-line-spacing: 1px;
+}
+
+/*
+ * A command the user typed: compact, tinted, and pushed to the right. It keeps
+ * the default system font, which is what sets it apart from the monospaced
+ * replies below.
+ */
+.command-label {
+    -fx-background-color: #2f6fed;
+    -fx-text-fill: white;
+    /* Squared off on the side nearest the user, so the bubble points at them. */
+    -fx-background-radius: 12px 12px 3px 12px;
+}
+
+/* A reply from the chatbot: full width, on a card that lifts off the backdrop. */
 .reply-label {
-    -fx-background-color: #f4e3c1;
+    -fx-font-family: "Menlo", "Consolas", monospace;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1c2230;
+    -fx-background-radius: 12px 12px 12px 3px;
+    -fx-border-color: #d7dceb;
+    -fx-border-radius: 12px 12px 12px 3px;
+}
+
+/*
+ * A complaint about a bad command. The red fill and the heavier left edge are
+ * what make a typo visible without reading, which is the point of the rule.
+ */
+.error-label {
+    -fx-font-family: "Menlo", "Consolas", monospace;
+    -fx-background-color: #fdeaea;
+    -fx-text-fill: #93231f;
+    -fx-background-radius: 12px 12px 12px 3px;
+    -fx-border-color: #e4948f;
+    -fx-border-radius: 12px 12px 12px 3px;
+    -fx-border-width: 1px 1px 1px 3px;
+}
+
+.input-row {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d7dceb transparent transparent transparent;
+    -fx-border-width: 1px;
+}
+
+.text-field {
+    -fx-font-size: 12.5px;
+    -fx-pref-height: 32px;
+    -fx-background-color: #eef1f6;
+    -fx-background-radius: 16px;
+    -fx-padding: 0 12px 0 12px;
+    -fx-prompt-text-fill: #8a93a8;
+}
+
+.text-field:focused {
+    -fx-background-color: #e3e9f8;
+    -fx-effect: none;
+}
+
+.button {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-pref-height: 32px;
+    -fx-background-color: #2f6fed;
+    -fx-background-radius: 16px;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #2559c4;
+}
+
+.button:disabled {
+    -fx-opacity: 0.45;
 }

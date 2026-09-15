@@ -33,7 +33,11 @@ public class MainWindow {
     private Button sendButton;
 
     private LebronJames lebronJames;
-    private final Image userImage = loadImage("/images/DaUser.png");
+
+    /**
+     * Portrait shown beside the chatbot's replies. There is no matching picture
+     * of the user: see {@link DialogBox} for why only one side carries one.
+     */
     private final Image lebronImage = loadImage("/images/DaLebron.jpg");
 
     /**
@@ -62,7 +66,7 @@ public class MainWindow {
      * Shows the chatbot's greeting, so the window is not empty on start-up.
      */
     public void showWelcome() {
-        addLebronDialog(lebronJames.getWelcomeMessage());
+        addLebronReply(lebronJames.getWelcomeMessage(), lebronJames.isErrorReply());
     }
 
     /**
@@ -79,8 +83,8 @@ public class MainWindow {
             return;
         }
 
-        dialogContainer.getChildren().add(DialogBox.getUserDialog(input, userImage));
-        addLebronDialog(lebronJames.getResponse(input));
+        dialogContainer.getChildren().add(DialogBox.getUserDialog(input));
+        addLebronReply(lebronJames.getResponse(input), lebronJames.isErrorReply());
         userInput.clear();
 
         if (lebronJames.isExit()) {
@@ -91,10 +95,18 @@ public class MainWindow {
     /**
      * Adds one reply from the chatbot to the conversation.
      *
+     * <p>A complaint about a bad command is drawn differently from an ordinary
+     * answer, so the user can see that something went wrong without having to
+     * read the message first.
+     *
      * @param reply Text the chatbot said.
+     * @param isError Whether the reply is a complaint rather than an answer.
      */
-    private void addLebronDialog(String reply) {
-        dialogContainer.getChildren().add(DialogBox.getLebronDialog(reply, lebronImage));
+    private void addLebronReply(String reply, boolean isError) {
+        DialogBox bubble = isError
+                ? DialogBox.getErrorDialog(reply, lebronImage)
+                : DialogBox.getLebronDialog(reply, lebronImage);
+        dialogContainer.getChildren().add(bubble);
     }
 
     /**
