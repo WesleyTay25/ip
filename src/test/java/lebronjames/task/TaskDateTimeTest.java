@@ -107,7 +107,7 @@ public class TaskDateTimeTest {
         LebronJamesException exception =
                 assertThrows(LebronJamesException.class, () -> TaskDateTime.parse("tomorrow"));
 
-        assertEquals("Oops! I could not understand the date 'tomorrow'.\n"
+        assertEquals("AIRBALL. I could not read the date 'tomorrow'.\n"
                 + "Please use " + TaskDateTime.ACCEPTED_FORMATS + ".", exception.getMessage());
     }
 

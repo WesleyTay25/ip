@@ -1,19 +1,61 @@
 /*
- * Minimal styling for the chat window. The chatbot's banner and its numbered
- * task lists are lined up with spaces, so a monospaced font is not decoration
- * here: in a proportional font the basketball drawing and the columns of the
- * list both come out crooked.
+ * The King's colours: the purple and gold of the jersey he is named after.
+ *
+ * Colour is doing the same job here as the wording in Ui and the crowned
+ * basketball in the banner, which is to make the chatbot recognisable as one
+ * character rather than a generic task list. Gold is kept for the user's own
+ * commands and purple for the King's replies, so the two voices stay apart.
+ *
+ * The font stays monospaced, because that is not decoration: the banner and the
+ * numbered playbook are lined up with spaces, and in a proportional font the
+ * crowned basketball and the columns of the list both come out crooked. Courier
+ * is asked for ahead of Menlo for its heavier, scoreboard-like look.
  */
 
+/* The scene's root node is given this style class by JavaFX itself. */
+.root {
+    -fx-background-color: #2b1350;
+}
+
+/* Every bubble, then the King's replies override what they need below. */
 .dialog-label {
-    -fx-font-family: "Menlo", "Consolas", monospace;
+    -fx-font-family: "Courier New", "Menlo", "Consolas", monospace;
     -fx-font-size: 12px;
-    -fx-background-color: #e8eaf0;
+    -fx-background-color: #fdb927;
+    -fx-text-fill: #241042;
     -fx-background-radius: 10px;
     -fx-padding: 8px;
 }
 
-/* Replies from the chatbot, tinted so the two speakers are easy to tell apart. */
+/* Replies from the King, in jersey purple with a gold trim. */
 .reply-label {
-    -fx-background-color: #f4e3c1;
+    -fx-background-color: #552583;
+    -fx-text-fill: #f7f2ff;
+    -fx-border-color: #fdb927;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.text-field {
+    -fx-font-family: "Courier New", "Menlo", "Consolas", monospace;
+    -fx-background-color: #efe9f7;
+    -fx-text-fill: #241042;
+    -fx-prompt-text-fill: #7a6a95;
+}
+
+.button {
+    -fx-font-weight: bold;
+    -fx-background-color: #fdb927;
+    -fx-text-fill: #2b1350;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #ffcb57;
 }

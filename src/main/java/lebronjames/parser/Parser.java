@@ -75,7 +75,7 @@ public class Parser {
         // could not be read back correctly. Rejecting it early keeps the file valid.
         if (fullCommand.contains(RESERVED_CHARACTER)) {
             throw new LebronJamesException(
-                    "Oops! '|' is reserved for saving tasks, so it cannot be used in a command.");
+                    "AIRBALL. '|' is reserved for saving the playbook, so it cannot be used in a command.");
         }
 
         if (fullCommand.equals(COMMAND_LIST)) {
@@ -106,10 +106,10 @@ public class Parser {
             return parseFind(fullCommand);
         }
         if (fullCommand.isBlank()) {
-            throw new LebronJamesException("Oops! Please enter a command.");
+            throw new LebronJamesException("AIRBALL. Call a play first.");
         }
-        throw new LebronJamesException("Sorry, I don't recognise that command.\n"
-                + "Please categorise tasks as todo, deadline, or event using the formats above.");
+        throw new LebronJamesException("AIRBALL. That play is not in my book.\n"
+                + "Call your plays as todo, deadline, or event using the formats above.");
     }
 
     /**
@@ -154,7 +154,7 @@ public class Parser {
 
         String description = argumentsAfter(fullCommand, COMMAND_TODO);
         if (description.isEmpty()) {
-            throw new LebronJamesException("Oops! A todo needs a description. Try: todo <task>");
+            throw new LebronJamesException("AIRBALL. A todo needs a description. Try: todo <task>");
         }
         return new Todo(description);
     }
@@ -174,7 +174,7 @@ public class Parser {
 
         int byIndex = fullCommand.indexOf(BY_SEPARATOR);
         if (byIndex == -1) {
-            throw new LebronJamesException("Oops! Use this deadline format: deadline <task> /by <deadline>");
+            throw new LebronJamesException("AIRBALL. Use this deadline format: deadline <task> /by <deadline>");
         }
 
         // The line always begins with the command word, so /by can never appear
@@ -182,10 +182,10 @@ public class Parser {
         String description = fullCommand.substring(COMMAND_DEADLINE.length(), byIndex).trim();
         String by = fullCommand.substring(byIndex + BY_SEPARATOR.length()).trim();
         if (description.isEmpty()) {
-            throw new LebronJamesException("Oops! A deadline needs a task description.");
+            throw new LebronJamesException("AIRBALL. A deadline needs a task description.");
         }
         if (by.isEmpty()) {
-            throw new LebronJamesException("Oops! A deadline needs a date or time after /by.");
+            throw new LebronJamesException("AIRBALL. A deadline needs a date or time after /by.");
         }
         return new Deadline(description, TaskDateTime.parse(by));
     }
@@ -207,20 +207,20 @@ public class Parser {
                 ? -1
                 : fullCommand.indexOf(TO_SEPARATOR, fromIndex + FROM_SEPARATOR.length());
         if (fromIndex == -1 || toIndex == -1) {
-            throw new LebronJamesException("Oops! Use this event format: event <task> /from <start> /to <end>");
+            throw new LebronJamesException("AIRBALL. Use this event format: event <task> /from <start> /to <end>");
         }
 
         String description = fullCommand.substring(COMMAND_EVENT.length(), fromIndex).trim();
         String from = fullCommand.substring(fromIndex + FROM_SEPARATOR.length(), toIndex).trim();
         String to = fullCommand.substring(toIndex + TO_SEPARATOR.length()).trim();
         if (description.isEmpty()) {
-            throw new LebronJamesException("Oops! An event needs a description.");
+            throw new LebronJamesException("AIRBALL. An event needs a description.");
         }
         if (from.isEmpty()) {
-            throw new LebronJamesException("Oops! An event needs a start date or time after /from.");
+            throw new LebronJamesException("AIRBALL. An event needs a start date or time after /from.");
         }
         if (to.isEmpty()) {
-            throw new LebronJamesException("Oops! An event needs an end date or time after /to.");
+            throw new LebronJamesException("AIRBALL. An event needs an end date or time after /to.");
         }
         return new Event(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
     }
@@ -237,7 +237,7 @@ public class Parser {
 
         String dateText = argumentsAfter(fullCommand, COMMAND_ON);
         if (dateText.isEmpty()) {
-            throw new LebronJamesException("Oops! The on command needs a date. Try: on 2019-12-02");
+            throw new LebronJamesException("AIRBALL. The on command needs a date. Try: on 2019-12-02");
         }
         return new OnCommand(TaskDateTime.parse(dateText).getDate());
     }
@@ -254,7 +254,7 @@ public class Parser {
 
         String keyword = argumentsAfter(fullCommand, COMMAND_FIND);
         if (keyword.isEmpty()) {
-            throw new LebronJamesException("Oops! The find command needs a keyword. Try: find book");
+            throw new LebronJamesException("AIRBALL. The find command needs a keyword. Try: find book");
         }
         return new FindCommand(keyword);
     }
@@ -278,14 +278,14 @@ public class Parser {
 
         String numberText = argumentsAfter(fullCommand, commandName);
         if (numberText.isEmpty()) {
-            throw new LebronJamesException("Oops! The " + commandName + " command needs a task number.");
+            throw new LebronJamesException("AIRBALL. The " + commandName + " command needs a play number.");
         }
 
         try {
             return Integer.parseInt(numberText);
         } catch (NumberFormatException exception) {
             throw new LebronJamesException(
-                    "Oops! The " + commandName + " command needs a whole-number task number.");
+                    "AIRBALL. The " + commandName + " command needs a whole-number play number.");
         }
     }
 }

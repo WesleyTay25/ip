@@ -46,6 +46,17 @@ public class UiTest {
     }
 
     @Test
+    public void showWelcome_bannerKeepsItsIndentation() {
+        // The crown is drawn by padding its lines, so trimming the leading
+        // spaces off the first one would leave it hanging off to one side.
+        ui.showWelcome();
+
+        String reply = ui.getResponse();
+        assertTrue(reply.startsWith("      /\\"), "the crown's first line must keep its padding");
+        assertTrue(reply.contains("They call me The King"), "should introduce the chatbot by name");
+    }
+
+    @Test
     public void showLoaded_noTasks_saysNothing() {
         // Nothing was restored, so there is nothing worth telling the user.
         ui.showLoaded(0);
@@ -79,7 +90,7 @@ public class UiTest {
     public void showTaskList_emptyList_headingOnly() {
         ui.showTaskList(new ArrayList<>());
 
-        assertEquals("Here are the tasks in your list:", ui.getResponse());
+        assertEquals("Here is your playbook:", ui.getResponse());
     }
 
     @Test
@@ -87,7 +98,7 @@ public class UiTest {
         ui.showTasksOn(new ArrayList<>(), LocalDate.of(2019, 12, 2));
 
         String reply = ui.getResponse();
-        assertTrue(reply.contains("Nothing scheduled"), "should say the day is free");
+        assertTrue(reply.contains("Rest day"), "should say the day is free");
         assertTrue(reply.contains("Dec 02 2019"), "should name the date asked about");
     }
 
@@ -99,7 +110,7 @@ public class UiTest {
         ui.showTasksOn(tasks, LocalDate.of(2019, 12, 2));
 
         String reply = ui.getResponse();
-        assertFalse(reply.contains("Nothing scheduled"));
+        assertFalse(reply.contains("Rest day"));
         assertTrue(reply.contains("1.[D][ ] return book"));
     }
 
@@ -107,7 +118,7 @@ public class UiTest {
     public void showMatchingTasks_noMatches_saysSo() {
         ui.showMatchingTasks(new ArrayList<>());
 
-        assertTrue(ui.getResponse().contains("No matching tasks"));
+        assertTrue(ui.getResponse().contains("No plays match"));
     }
 
     @Test
@@ -119,7 +130,7 @@ public class UiTest {
         ui.showMatchingTasks(tasks);
 
         String reply = ui.getResponse();
-        assertTrue(reply.contains("Here are the matching tasks in your list:"));
+        assertTrue(reply.contains("Here are the plays that match:"));
         assertTrue(reply.contains("1.[T][ ] read book"));
         assertTrue(reply.contains("2.[T][ ] return book"));
     }
@@ -155,6 +166,6 @@ public class UiTest {
 
         String reply = ui.getResponse();
         assertTrue(reply.contains("Oops! I could not read the file."));
-        assertTrue(reply.contains("empty list"), "should say what happens next");
+        assertTrue(reply.contains("playbook empty"), "should say what happens next");
     }
 }
