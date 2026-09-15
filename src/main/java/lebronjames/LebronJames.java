@@ -45,6 +45,7 @@ public class LebronJames {
     private final Storage storage;
     private final TaskList tasks;
     private boolean isExit = false;
+    private boolean isErrorReply = false;
 
     /**
      * Creates a chatbot that saves to, and loads from, the given file.
@@ -60,7 +61,7 @@ public class LebronJames {
         this.ui = new Ui();
         this.storage = new Storage(firstPathPart, remainingPathParts);
         ui.showWelcome();
-        this.tasks = loadTasks(storage, ui);
+        this.tasks = loadTasks();
     }
 
     /**
@@ -115,6 +116,7 @@ public class LebronJames {
      * @return Reply to show the user.
      */
     public String getResponse(String fullCommand) {
+        isErrorReply = false;
         try {
             Command command = Parser.parse(fullCommand);
 
@@ -126,8 +128,24 @@ public class LebronJames {
             isExit = command.isExit();
         } catch (LebronJamesException exception) {
             ui.showError(exception.getMessage());
+            isErrorReply = true;
         }
         return ui.getResponse();
+    }
+
+    /**
+     * Returns whether the reply just handed out was a complaint about the input
+     * rather than an answer to it.
+     *
+     * <p>The graphical interface uses this to draw a rejected command
+     * differently from an accepted one. Only the front end cares, which is why
+     * the distinction is reported here rather than folded into the reply text,
+     * where the console interface would be forced to show it too.
+     *
+     * @return Whether the last reply reported a problem.
+     */
+    public boolean isErrorReply() {
+        return isErrorReply;
     }
 
     /**
@@ -162,11 +180,9 @@ public class LebronJames {
      * <p>Startup never fails because of the save file: if it cannot be read at
      * all, the chatbot warns the user and begins with an empty list.
      *
-     * @param storage Storage to load from.
-     * @param ui User interface used to report the outcome.
      * @return Tasks restored from disk, or an empty list if none could be read.
      */
-    private static TaskList loadTasks(Storage storage, Ui ui) {
+    private TaskList loadTasks() {
         try {
             ArrayList<Task> savedTasks = storage.load();
 
@@ -178,6 +194,7 @@ public class LebronJames {
             return new TaskList(savedTasks);
         } catch (LebronJamesException exception) {
             ui.showLoadingError(exception.getMessage());
+            isErrorReply = true;
             return new TaskList();
         }
     }
