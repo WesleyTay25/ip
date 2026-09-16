@@ -180,14 +180,14 @@ public class Parser {
         // The line always begins with the command word, so /by can never appear
         // before the description starts. No lower bound on byIndex is needed.
         String description = fullCommand.substring(COMMAND_DEADLINE.length(), byIndex).trim();
-        String by = fullCommand.substring(byIndex + BY_SEPARATOR.length()).trim();
+        String byText = fullCommand.substring(byIndex + BY_SEPARATOR.length()).trim();
         if (description.isEmpty()) {
             throw new LebronJamesException("AIRBALL. A deadline needs a task description.");
         }
-        if (by.isEmpty()) {
+        if (byText.isEmpty()) {
             throw new LebronJamesException("AIRBALL. A deadline needs a date or time after /by.");
         }
-        return new Deadline(description, TaskDateTime.parse(by));
+        return new Deadline(description, TaskDateTime.parse(byText));
     }
 
     /**
@@ -211,18 +211,18 @@ public class Parser {
         }
 
         String description = fullCommand.substring(COMMAND_EVENT.length(), fromIndex).trim();
-        String from = fullCommand.substring(fromIndex + FROM_SEPARATOR.length(), toIndex).trim();
-        String to = fullCommand.substring(toIndex + TO_SEPARATOR.length()).trim();
+        String fromText = fullCommand.substring(fromIndex + FROM_SEPARATOR.length(), toIndex).trim();
+        String toText = fullCommand.substring(toIndex + TO_SEPARATOR.length()).trim();
         if (description.isEmpty()) {
             throw new LebronJamesException("AIRBALL. An event needs a description.");
         }
-        if (from.isEmpty()) {
+        if (fromText.isEmpty()) {
             throw new LebronJamesException("AIRBALL. An event needs a start date or time after /from.");
         }
-        if (to.isEmpty()) {
+        if (toText.isEmpty()) {
             throw new LebronJamesException("AIRBALL. An event needs an end date or time after /to.");
         }
-        return new Event(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
+        return new Event(description, TaskDateTime.parse(fromText), TaskDateTime.parse(toText));
     }
 
     /**
