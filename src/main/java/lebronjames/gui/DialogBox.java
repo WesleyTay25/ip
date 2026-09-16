@@ -144,10 +144,10 @@ public class DialogBox extends HBox {
      * @return Square region of the picture to display.
      */
     private static Rectangle2D squareCentreOf(Image image) {
-        double side = Math.min(image.getWidth(), image.getHeight());
-        double left = (image.getWidth() - side) / 2;
-        double top = (image.getHeight() - side) / 2;
-        return new Rectangle2D(left, top, side, side);
+        double sideLength = Math.min(image.getWidth(), image.getHeight());
+        double leftOffset = (image.getWidth() - sideLength) / 2;
+        double topOffset = (image.getHeight() - sideLength) / 2;
+        return new Rectangle2D(leftOffset, topOffset, sideLength, sideLength);
     }
 
     /**
