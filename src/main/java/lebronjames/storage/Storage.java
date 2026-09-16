@@ -140,7 +140,7 @@ public class Storage {
             throw new LebronJamesException("Line has too few fields.");
         }
 
-        String type = fields[0];
+        String taskType = fields[0];
         boolean isDone = parseDoneFlag(fields[1]);
         String description = fields[2];
         if (description.isEmpty()) {
@@ -148,7 +148,7 @@ public class Storage {
         }
 
         Task task;
-        switch (type) {
+        switch (taskType) {
             case Todo.FILE_TYPE:
                 requireFieldCount(fields, 3);
                 task = new Todo(description);
@@ -165,7 +165,7 @@ public class Storage {
                 task = new Event(description, TaskDateTime.parse(fields[3]), TaskDateTime.parse(fields[4]));
                 break;
             default:
-                throw new LebronJamesException("Unknown task type: " + type);
+                throw new LebronJamesException("Unknown task type: " + taskType);
         }
 
         // Records that the switch above is exhaustive: each known type assigns a
@@ -182,18 +182,18 @@ public class Storage {
     /**
      * Interprets the saved completion flag.
      *
-     * @param flag Field expected to be {@code 0} or {@code 1}.
+     * @param doneFlag Field expected to be {@code 0} or {@code 1}.
      * @return Whether the task was completed.
      * @throws LebronJamesException If the flag is anything else.
      */
-    private static boolean parseDoneFlag(String flag) throws LebronJamesException {
-        if (flag.equals("1")) {
+    private static boolean parseDoneFlag(String doneFlag) throws LebronJamesException {
+        if (doneFlag.equals("1")) {
             return true;
         }
-        if (flag.equals("0")) {
+        if (doneFlag.equals("0")) {
             return false;
         }
-        throw new LebronJamesException("Completion flag must be 0 or 1 but was: " + flag);
+        throw new LebronJamesException("Completion flag must be 0 or 1 but was: " + doneFlag);
     }
 
     /**
