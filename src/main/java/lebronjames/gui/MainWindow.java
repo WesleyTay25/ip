@@ -77,14 +77,14 @@ public class MainWindow {
      */
     @FXML
     private void handleUserInput() {
-        String input = userInput.getText();
-        if (input.isBlank()) {
+        String commandText = userInput.getText();
+        if (commandText.isBlank()) {
             // Nothing was typed, so there is no command to answer.
             return;
         }
 
-        dialogContainer.getChildren().add(DialogBox.getUserDialog(input));
-        addLebronReply(lebronJames.getResponse(input), lebronJames.isErrorReply());
+        dialogContainer.getChildren().add(DialogBox.getUserDialog(commandText));
+        addLebronReply(lebronJames.getResponse(commandText), lebronJames.isErrorReply());
         userInput.clear();
 
         if (lebronJames.isExit()) {
