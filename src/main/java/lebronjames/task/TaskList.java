@@ -140,8 +140,8 @@ public class TaskList {
         assert task != null : "Cannot look for a duplicate of a null task";
 
         // indexOf compares with equals, which is what defines a duplicate here.
-        int index = tasks.indexOf(task);
-        return index == -1 ? NO_DUPLICATE : index + 1;
+        int duplicateIndex = tasks.indexOf(task);
+        return duplicateIndex == -1 ? NO_DUPLICATE : duplicateIndex + 1;
     }
 
     /**
